@@ -1,0 +1,10 @@
+__pycache__/
+*.log
+*.tmp
+*.bak
+*.tar.gz
+.DS_Store
+dropbox_keys.json
+google_credentials.json
+google_credentials.json
+

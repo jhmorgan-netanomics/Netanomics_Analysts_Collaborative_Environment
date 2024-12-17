@@ -1,0 +1,94 @@
+. This is dataplot program   mills_20_256.dp     7/3/12 => 1/12/21
+. Purpose: TCP Internet Congestion Control (Kevin Mills' simulation experiment #3)
+.          Response 22 (out of 45): Node Reallocation Rate
+. Date: 7/3/12 => 1/12/21
+.
+. -----start point-----
+.
+feedback off
+dimension 100 variables
+.
+. -----Step 1: Name the dataplot code file (= this file), and the input data file-----
+.
+let string filecode = mills_20_256.dp
+let string filedata = mills_20_256.dat
+.
+. -----Step 2: Name the root for the 4 output files (default = dataplot_out.pdf/ps/dp/dat)-----
+. -----        + will allow auto-view of   dataplot_out.pdf   via   v   command or desktop shortcut-----
+.
+let string fileout = dataplot_out
+device 2 close; set ipl1na ^fileout&.ps; device 2 postscript
+capture fileout.bat; print "^fileout.pdf"; end capture
+.
+. -----Step 3: Read in the data-----
+.
+let k = 20
+skip 0; read   ^filedata   y x1 to x^k
+stat v
+pause
+.
+print y x1 x2 x3; status v;
+print "The data from file     ^filedata    has just been read in."
+let ny = number y; print "Number of data rows = ^ny"
+print "Hit 'Enter' to continue . . ."
+pause
+.
+. -----Step 4: Define strings for plot annotation-----
+.
+let string header   = Factors Affecting TCP Internet Congestion Control Node Reallocation Rate
+let string header2  = Design: 2**(20-12) (k=20,n=256)        Scientist: Kevin Mills (NIST/ITL)
+let string trailer  = Code file: ^filecode
+let string trailer2 = Data file: ^filedata
+let string trailer3 = Output file: ^fileout&.pdf
+let string currdate = 7/3/12
+.
+let string sty = Node Reallocation Rate
+.
+let string stx1  = #U
+let string stx2  = UTP
+let string stx3  = UHT
+let string stx4  = UDC
+let string stx5  = UBRP
+let string stx6  = CdCCC
+let string stx7  = CdRC
+let string stx8  = CsASV
+let string stx9  = CsRSV
+let string stx10 = CsPTP
+let string stx11 = CsRCF
+let string stx12 = NdPN
+let string stx13 = NdPF
+let string stx14 = NdPC
+let string stx15 = CD
+let string stx16 = CBSD
+let string stx17 = CWSD
+let string stx18 = CBSL
+let string stx19 = CWSL
+let string stx20 = CCCP
+.
+let string stbest = up
+let string colorl = blue red
+.
+. -----Step 5: Generate DEX 10-step analysis-----
+.
+let string forecol = black; let string levcol = red blue
+call set_color.dp
+.
+call dex10stepanalysis.dp
+. call dexmp.dp
+.
+. -----Step 99: Finish up-----
+.
+. print "At start of step 99 (= finish up) of ^fileout&.dp"
+. pause
+.
+system del     ^fileout&.dp
+system del     ^fileout&.dat
+system copy    ^filecode    ^fileout&.dp
+system copy    ^filedata    ^fileout&.dat
+.
+print " "
+print "Output files:"
+print "   pdf graphics file: ^fileout&.pdf"
+print "   ps  graphics file: ^fileout&.ps"
+print "   txt program  file: ^fileout&.dp"
+print "   txt data     file: ^fileout&.dat"

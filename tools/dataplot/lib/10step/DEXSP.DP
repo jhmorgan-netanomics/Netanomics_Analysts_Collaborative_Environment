@@ -1,0 +1,459 @@
+. This is dataplot macro   DEXSP.DP            updated: 10/29/18
+. Purpose: Generate a DEX scatter plot
+.          (= ste p 2 of the DEXPLOT.DP 10-ste p DEX analysis procedure)
+.
+. Note: Input parameters, vectors, matrices, or strings needed:
+.
+. Input (Required):
+.    1. y (vector)                   = Response variable
+.    2. x1, x2, x3, . . . (vectors)    = Factors
+.    3. k (parameter)                = Total number of factors
+
+. Input (Optional):
+.    4. project (string)             = Project title to appear at top of page
+.    5. sty      (string)             = Name of response variable
+.    6. cx1, cx2, cx3, . . . (strings) = Names of the 1st, 2nd, 3rd, . . . factors
+.    7. circleh  (parameter)         = Height of plot circles   (default = 2)
+.    8. circlew  (parameter)         = Width  of plot circles   (default = 1)
+.    9. decplace (parameter)         = Number of decimal places (default = 4)
+.   10. titlesw  (parameter)         = (0,1) Switch for title printing (default = 1 ==> Main Effects Plot)
+.   11. titlesiz (parameter)         = Size of title to appear at top of plot (default = 2)
+.   12. labelsiz (parameter)         = Size of label to appear at right & bottom of plot (default = 2)
+
+.   15. rigmarsw (parameter)         = (0,1) switch dictating the listing of factors & levels in right margin
+.                            (default = 1, but requires existence of stx1, stx2, . . . and stx1l, stx2l, . . .)
+.   16. stx1, stx2, stx3, . . . (strings) = Names of the 1st, 2nd, 3rd, . . . factors
+.                                      (default = no names)
+.   17. stx1l, stx2l, stx3l, . . . (strings) = Names of the  levels within each of the factors
+.                                      (default = no names)
+.   18. stxshort (string)            = Multi-component shorter names for each factor (optional)
+.   19. framet (parameter)           = top    frame line (in %) (optional) (default = 90)
+.   20. frameb (parameter)           = bottom frame line (in %) (optional) (default = 20)
+.
+.   21. stepprsw (parameter)         = (0,1) switch to dictate whether upper left step id should be printed (default = 1 = yes) ;. 9/17/18
+.   22. levint   (parameter)         = 0,1 switch dictating whether hor. axis labels (and right margin indices) are integers (optional)
+.   23. frame (string)               = subset/except specification;. 4/16/20
+.
+. Note: Graphics output produced = A 1-page plot: DEX Scatter Plot
+.          Vertical   axis = Response variable
+.          Horizontal axis = Each factor and each level within a factor
+.
+. Note: Graphics interpretation: I_f the response values differ
+.                                across levels within a factor,
+.                                then the factor is deemed to "have an effect"
+.
+. Note: Macros called by this macro:
+.       dexplotiniti.dp
+.       dexwriteproject.dp
+.       dexknbox.dp
+.       tagcorn.dp
+.
+. Date: May 2005, July 2010, . . ., 10/29/18
+.
+. -----start point-----
+.
+print " "; print "=====> Now generating Plot 2 (DEX Scatter plot) <====="
+.
+feedback save
+feedback off
+printing off
+let bugsp = 0
+. let pausesw = 1
+.
+if bugsp = 1; print " "; print "--At beginning of DEX Ste p 2 (DEXSP.DP)"
+   print "   levelsw = ^levelsw"
+   print stx1 stx2 stx3 stx4 stx5
+   print stx1l stx2l stx3l stx4l stx5l
+   if pausesw = 1; pause; end if
+end if
+.
+. ----------------------------------------------
+. -----Do Analysis Ste p 2: DEX Scatter Plot-----
+. ----------------------------------------------
+.
+. -----Step 1.0: if frame exists, the save the original data and extract the subset-----
+.
+if bugsp = 1
+   print "--At start of (dexsp.dp, step 1.0): if frame exists, save the original data and extract the subset"
+   if frame not exist; print "      frame does not exist"; end if
+   if frame exists;    print "      frame = ^frame"; end if
+   print "Pre-  date saving & frame extraction:"
+   stat v
+   if pausesw = 1; pause; end if
+end if
+.
+if frame exists
+   call save_full_dataset.dp
+   delete stallx; let stallx = string combine x1 to x^k
+   retain y ^stallx ^frame
+end if
+.
+if bugsp = 1
+   print "Post-  date saving & frame extraction:"
+   stat v
+   if pausesw = 1; pause; end if
+end if
+.
+. -----Step 1.1: Check input values for existence and equal length-----
+if bugsp = 1; print "--At (dexsp.dp, step 1.1): check input"
+   if pausesw = 1; pause; end if
+end if
+.
+let string stmacro = dexsp.dp
+if k not exist
+   call determine_k.dp
+end if
+set check name output filliben
+set check length output filliben
+if k = 1; let iflag = check name k y x1 ; end if
+if k >= 2
+   let iflag = check name k y x1 to x^k
+   let iflag = check equal length y x1 to x^k
+end if
+.
+let numlevto = 0
+loop for jz = 1 1 k
+    let numlev^jz = unique x^jz
+    let numlevva(jz) = numlev^jz
+end of loop
+let numlevto = sum     numlevva
+let numlevmn = minimum numlevva
+let numlevmx = maximum numlevva
+let numlevdi = unique  numlevva
+.
+. -----Step 2: Define plot settings-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 2): plot settings"
+   if pausesw = 1; pause; end if
+end if
+.
+call dexplotinit.dp
+call dexplotdefplotset.dp
+.
+. -----Step 3: Define more colors-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 3): colors"
+   if pausesw = 1; pause; end if
+end if
+.
+let string colorchz = blue
+if forecol exists; let string colorchz = ^forecol; end if
+if colorcha exists; let string colorchz = ^colorcha; end if
+let string coloralz = blue
+if forecol exists; let string coloralz = ^forecol; end if
+if forecol exists; color ^forecol; end if
+if forecol exists; let string tagcolor = ^forecol; end if
+.
+. -----Step 4: Define plot limits and turn labels off-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 4): limits & labels"
+   if pausesw = 1; pause; end if
+end if
+.
+let kp1 = k+1
+let kp2 = k+2
+.
+. xtic offset 10 10
+xtic offset 0 0
+. xlimits 1 k
+xlimits 0 kp1
+. major x1tic number k
+major x1tic number kp2
+minor x1tic number 0
+.
+x3label Factors (^k)
+x3label size 3
+if stprex exists
+   x3label ^stprex Factors (^k)
+end if
+x3label displacement 11
+if k >= 6
+   x3label displacement 13
+end if
+.
+set string space ignore
+let string igtempe = cr()
+let string igtempo = cr()
+if k >= 6
+   let string igtempo = cr()
+   let string igtempe = cr()sp()cr()
+end if
+.
+let string ig1 = sp()
+let icnt = 1
+loop for jz = 1 1 k
+    let icnt = icnt + 1
+    let string igtemp2 = X^jz
+    let string ig^icnt = ^igtemp2
+    let ieven = mod(jz,2)
+    let string igtemp = ^igtempo
+    if ieven = 0
+       let string igtemp = ^igtempe
+    end if
+    if stx^jz exists
+       let string stjunk = ^stx^jz
+       let ig^icnt = string concatenate igtemp2 igtemp stjunk
+    end if
+    if stxshort exists
+       let stjunk = string word stxshort jz
+       let ig^icnt = string concatenate igtemp2 igtemp stjunk
+       delete igtemp2
+    end if
+    delete stjunk igtemp2
+end of loop
+delete igtemp
+let string ig^kp2 = sp()
+let ig = group label ig1 to ig^kp2
+x1tic mark label format group label
+x1tic mark label content ig
+x1tic mark label on
+label color ^coloralz
+tic mark label color ^coloralz
+tic mark color ^coloralz
+.
+. -----Step 5: Define titles and labels-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 5): titles & labels"
+   if pausesw = 1; pause; end if
+end if
+.
+. -----BUG FIX (1/4/21): the following 7 lines fixed a bug (too long to plot):-----
+. -----For large n (say, n >= 1025), the dex scatter plot-----
+. -----takes too long drawing out filled circles (peter fontana (k=15,n~64000))
+.
+char X blank
+char hw 2 1
+let n = number y
+if n <= 1024
+   call setcircle.dp
+   char offset 0 0 all
+end if
+.
+if titlesw not exist; title Scatter Plot; end if
+if titlesw exist and titlesw = 1; title Scatter Plot; end if
+.
+if sty not exist; y1label Response Y; end if
+if sty exists; y1label Response Y (^sty); end if
+.
+. x1label Factors
+if labelsiz exists; label size ^labelsiz; end if
+if ticlabsi exists; tic label size ^ticlabsi; end if
+.
+. -----Step 6: GENERATE THE PLOT-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 6): GENERATE THE PLOT"
+   print "k = ^k"
+   if pausesw = 1; pause; end if
+end if
+.
+. ylim 0 100
+.
+. ylimits
+. ylimits unfreeze
+.
+if k = 1; dex scatter plot y x1; end if              ;. <============================
+if k >= 2; dex scatter plot y x1 to x^k; end if              ;. <============================
+.
+if bugsp = 1
+   print "post-plot:"
+   print xplot yplot tagplot
+   if pausesw = 1; pause; end if
+end if
+.
+x3label
+label displacement
+x1tic mark label format
+x1tic mark label content
+x1tic mark label off
+. limits freeze
+. pre-erase off
+char bl all
+lines solid all
+.
+delete xplotd
+let xplotd = distinct xplot
+retain xplotd for i = 1 1 numlevto
+let nxplot = size xplotd
+.
+. -----Step 7: Write out the factor level labels-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 7): factor labels"
+   if pausesw = 1; pause; end if
+end if
+.
+call dexsp_write_factor_levels.dp
+.
+. -----Step 11: Write out . . .-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 11): xxx"
+   if pausesw = 1; pause; end if
+end if
+.
+let bz = 12
+just cece
+hw texth textw
+loop for jz = 1 1 k
+   let az = jz
+   moveds az bz
+   if suv^az exist; text ^suv^az; end if
+end loop
+.
+. -----Step 8: If called for, draw out an arrow for "best"-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 8): arrow for "best"
+   if pausesw = 1; pause; end if
+end if
+.
+if stbest exists
+   call dexarrow.dp
+end if
+.
+. -----Step 21: Write out project title, (n,k) box, annotate, and zzStepzz-----
+.
+color blue
+.
+if bugsp = 1; print "--At (dexsp.dp, step 21): proj,(n,k),ybar,step,annotate"
+   if pausesw = 1; pause; end if
+end if
+.
+if project exists
+   if forecol exists; color ^forecol; end if
+   call dexwriteproject.dp
+end if
+.
+call dexknbox.dp
+.
+let ybar = mean y
+if decplacm not exist; set write decimals 4; end if
+if decplacm exists; set write decimals decplacm; end if
+let stybar = number to string ybar
+move 85 91; just right; hw 2 1; text Mean = ^stybar; just center
+.
+if step exists
+   let step = step + 1; hw 2 1; just left; move 5 95
+   . text Step ^step
+   . call tagcorn.dp   9/17/18/
+   if stepprsw not exist
+      call tagcorn.dp
+   end if
+   if stepprsw exists; if stepprsw = 1
+      call tagcorn.dp
+   end if; end if
+end if
+.
+if annotate exists and annotate = 1
+   if forecol exists; color ^forecol; end if
+   call annotate.dp
+end if
+.
+. -----Step 22: Write out right margin factor and setting info-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 22): right margin"
+   if pausesw = 1; pause; end if
+end if
+.
+if rightmsw exists and rightmsw = 1 or rightmsw not exist
+   if stx1 exists and stx1l exists
+      let ypdel = 2; let lh = 1.8; let lw = 0.9
+      if k >= 9
+         let ypdel = 1.5; let lh = 1.6; let lw = 0.8
+         . let string colorl = red blue green black
+      end if
+      call dexrightmargin.dp
+      delete ypdel lh lw
+   end if
+end if
+.
+. -----Step 23: If called for, write out customized upper left info-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 23): upper left"
+   if pausesw = 1; pause; end if
+end if
+.
+.
+if stcorn1 exists
+   call upperleft.dp
+end if
+.
+. -----Step 24: If called for, print out a target reference line-----
+.
+if bugsp = 1; print "--At (dexsp.dp, step 24): target reference line"
+   if pausesw = 1; pause; end if
+end if
+.
+if ytarget exists
+   lines dotted; drawsdsd 15 ytarget 85 ytarget
+   lines solid; drawsdsd 84.25 ytarget 85.75 ytarget
+   movesd 86 ytarget; move relative 0 .3; hw 2 1; just lece; text Target = ^ytarget
+   just left
+end if
+.
+. -----Step 99.1: if frame exists, then restore the original data-----
+.
+if bugsp = 1
+   print "--At start of (dexsp.dp, step 99.1): restore original data if frame existed"
+   if frame not exist; print "      frame did not exist"; end if
+   if frame exists;    print "      frame = ^frame"; end if
+   print "Pre-  data restoration:"
+   stat v
+   if pausesw = 1; pause; end if
+end if
+.
+if frame exists
+   delete stallx; let stallx = string combine x1 to x^k
+   delete y; delete ^stallx
+   call restore_full_dataset.dp
+end if
+.
+if bugsp = 1
+   print "Post- data restoration:"
+   stat v
+   if pausesw = 1; pause; end if
+end if
+.
+. -----Step 99.2: Finish up otherwise-----
+.
+if bugsp = 1
+   print "--At (dexsp, step 99.2): finishing up otherwise"
+   if pausesw = 1; pause; end if
+end if
+.
+. note--the limits unfreeze command must be AFTER the ylimits command   11/2/18
+xlimits
+ylimits
+limits unfreeze
+.
+char blank all
+char fill off all
+char hw 2 1 all
+char offset 0 0 all
+char justification cece all
+lines solid all
+xtic offset 5 5
+ytic offset 5 5
+tic label format default
+minor xtic number default
+major xtic number default
+just left
+title
+label
+x1tic label on
+. pre-erase on
+.
+region fill off  ;. 11/16/18
+.
+. pause
+. stop
+.
+. feedback on
+.
+delete cxplotz cxfactz coefz tagz relcoefz
+delete  cdfz temp
+delete dxz bz xplotd
+.
+feedback restore
+.
+if itime exists and itime = 1
+   cpu time
+   let t2 = cputime
+end of if

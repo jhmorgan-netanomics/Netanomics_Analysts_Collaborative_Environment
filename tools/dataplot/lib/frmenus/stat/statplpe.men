@@ -1,0 +1,90 @@
+This is file statplpe.men--Generate Statistic Plots (Percentiles)
+ 
+--------------------line 3
+01. Statistic Plots (Percentiles and Extremes)
+02. <statistic> PLOT Y X
+03.
+04. Vertical   Axis Variable:
+04. @CE 1 0 37 54 ? gui-vari
+05. Group ID        Variable:
+05. @CE 2 0 37 54 ? gui-vari
+06.
+07. Statistic (Select one):
+08. @CE 3 1 5 25 minimum
+08. @CE 3 2 30 50 maximum
+09. @CE 3 3 5 25 extreme
+09. @CE 3 4 30 50 decile
+10. @CE 3 5 5 25 lower hinge
+10. @CE 3 6 30 50 upper hinge
+11. @CE 3 7 5 25 lower quartile
+11. @CE 3 8 30 50 upper quartile
+12. @CE 3 9 5 25 percentile
+12. @CE 3 10 30 50 quantile
+13.
+14. Desired percentile (>0, < 100):
+14. @CE 4 0 42 50 ? 
+15. Desired quantile (> 0, < 1)):
+15. @CE 5 0 42 50 ?
+16. Desired decile (first, second, ..., ninth):
+16. @CE 6 0 42 50 ?
+17.
+18. Character Type for Data
+18. @CE 7 0 42 50 * gui-char
+19. Character Fill for Data
+19. @CE 8 0 42 50 gui-ooff
+20. Line Type for Data-connecting Line
+20. @CE 9 0 42 50 * gui-line
+21. Line Type for Global Stat Line?
+21. @CE 10 0 42 50 * gui-line
+22. Spike to Global Stat Line?
+22. @CE 11 0 42 50 gui-ooff
+23.
+24. Title:
+24. @CE 12 0 10 50 *
+25. Left Axis Label:
+25. @CE 13 0 22 50 *
+26. Bottom Axis Label:
+26. @CE 14 0 22 50 *
+27.
+28. Subset/Except/For Specification:
+29. @CE 15 0 1 50 *
+30.
+31.
+32. Generate the Statistic Plot?:
+--------------------
+TITLE _12
+Y1LABEL _13
+X1LABEL _14
+CHARACTERS _7
+CHARACTER FILL _8
+LINES _9 _10
+LET XQ = _5
+LET P100 = _4
+.
+@IF 3 1 LET ZSTAT = MINIMUM _1 _15
+@IF 3 2 LET ZSTAT = MAXIMUM _1 _15
+@IF 3 3 LET ZSTAT = EXTREME _1 _15
+@IF 3 4 LET ZSTAT = _6 DECILE _1 _15
+@IF 3 5 LET ZSTAT = LOWER HINGE _1 _15
+@IF 3 6 LET ZSTAT = UPPER HINGE _1 _15
+@IF 3 7 LET ZSTAT = LOWER QUARTILE _1 _15
+@IF 3 8 LET ZSTAT = UPPER QUARTILE _1 _15
+@IF 3 9 LET ZSTAT = _4 PERCENTILE _1 _15
+@IF 3 10 LET ZSTAT = _5 QUANTILE _1 _15
+SPIKE _11
+SPIKE BASE ZSTAT
+.
+BAR OFF OFF
+@IF 3 1 MINIMUM PLOT _1 _2 _15
+@IF 3 2 MAXIMUM PLOT _1 _2 _15
+@IF 3 3 EXTREME PLOT _1 _2 _15
+@IF 3 4 _6 DECILE PLOT _1 _2 _15
+@IF 3 5 LOWER HINGE PLOT _1 _2 _15
+@IF 3 6 UPPER HINGE PLOT _1 _2 _15
+@IF 3 7 LOWER QUARTILE PLOT _1 _2 _15
+@IF 3 8 UPPER QUARTILE PLOT _1 _2 _15
+@IF 3 9 PERCENTILE PLOT _1 _2 _15
+@IF 3 10 QUANTILE PLOT _1 _2 _15
+--------------------
+WEB HELP STATISTICS PLOT
+--------------------

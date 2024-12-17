@@ -1,0 +1,1 @@
+This directory contains files and directories leading through common collaborative environment workflows.

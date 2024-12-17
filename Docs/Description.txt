@@ -1,0 +1,1 @@
+This directory contains documents describing the dependencies, functions, and capabilities of the collaborative environment.
