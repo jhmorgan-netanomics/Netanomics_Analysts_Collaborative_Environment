@@ -207,6 +207,10 @@ RUN pip3 install --no-cache-dir \
     pandas \
     numpy \
     pexpect \
+    nltk \
+    textblob \
+    bertopic \
+    beautifulsoup4 \
     pymc \
     cmdstanpy \
     arviz \
