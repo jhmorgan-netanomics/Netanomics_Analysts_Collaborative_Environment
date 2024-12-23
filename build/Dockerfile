@@ -133,9 +133,9 @@ RUN apt-get update && \
 
 # Install necessary R dependencies, including additional requested packages
 RUN R -e "install.packages(c('tidyverse', 'dplyr', 'lme4', 'cowplot', 'igraph', 'stringr', 'purrr', 'tidyr', 'httr', 'jsonlite', \
-                             'HLMdiag', 'predictmeans', 'bayesplot', 'posterior', 'loo', 'BMS', 'tikzDevice', 'knitr', 'rstan', 'parallel', \
-                             'sysfonts', 'extrafont', 'showtext', 'readr', 'psch', 'forecast', 'network', 'sna', 'ergm', \
-                             'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet'), \
+                             'HLMdiag', 'predictmeans', 'bayesplot', 'posterior', 'loo', 'BMS', 'tikzDevice', 'knitr', 'rstan', 'parallel', 'readxl', 'datetimeutils', \
+                             'sysfonts', 'extrafont', 'showtext', 'readr', 'psch', 'forecast', 'plotrix', 'RColorBrewer', 'circlize', 'languageserver', \
+                             'network', 'sna', 'ergm', 'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet'), \
                              repos='https://cloud.r-project.org')"
 
 # Install devtools and its dependencies
@@ -487,7 +487,7 @@ COPY docker_utils.sh /root/docker_utils.sh
 RUN echo 'source /root/docker_utils.sh' >> /root/.bashrc
 
 # ----------------------------------------
-# 16. Add dbus and configure workspace
+# 17. Add dbus and configure workspace
 # ----------------------------------------
 
 # Install dbus and dependencies
@@ -500,7 +500,7 @@ RUN mkdir -p /run/user/1000 && chmod 700 /run/user/1000
 ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
 
 # ----------------------------------------
-# 16. Create Workspace Directory and Setup
+# 18. Create Workspace Directory and Setup
 # ----------------------------------------
 
 # Install PyXDG for Openbox
@@ -508,6 +508,11 @@ RUN apt-get update && apt-get install -y python3-pyxdg && apt-get clean
 
 # Set the default working directory to /workspace
 WORKDIR /workspace
+
+# Create VSCode configuration for Julia, R, and Python
+COPY configure_vscode.sh /usr/local/bin/configure_vscode.sh
+RUN chmod +x /usr/local/bin/configure_vscode.sh
+RUN /usr/local/bin/configure_vscode.sh
 
 # Copy start_workspace.sh directly into the image
 COPY start_workspace.sh /usr/local/bin/start_workspace.sh

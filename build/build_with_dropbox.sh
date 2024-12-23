@@ -67,3 +67,19 @@ if [ "$GOOGLE_PLACEHOLDER_CREATED" = true ]; then
     rm "$GOOGLE_KEYS"
 fi
 
+# Run the Docker container with volume mounts for Julia, Python, and R caches
+echo "Running the Docker container with persistent caches for Julia, Python, and R..."
+
+JULIA_CACHE="$HOME/.julia"
+PYTHON_CACHE="$HOME/.cache/pip"
+R_CACHE="$HOME/.cache/R"
+
+# Create the cache directories if they don't exist
+mkdir -p "$JULIA_CACHE" "$PYTHON_CACHE" "$R_CACHE"
+
+docker run \
+    -v "$JULIA_CACHE:/root/.julia" \
+    -v "$PYTHON_CACHE:/root/.cache/pip" \
+    -v "$R_CACHE:/root/.cache/R" \
+    -it "$TAG_NAME" /bin/bash
+

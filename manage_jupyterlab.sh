@@ -1,17 +1,3 @@
-#!/bin/bash
-
-# Path to the virtual environment
-VENV_PATH="/home/ubuntu/jupyterlab-env"
-
-# Defaults
-DEFAULT_CONTAINER_NAME="collaborative-env"
-DEFAULT_ELASTIC_IP="52.70.230.30"
-
-# Parse arguments
-COMMAND=$1
-CONTAINER_NAME=${2:-$DEFAULT_CONTAINER_NAME}
-ELASTIC_IP=${3:-$DEFAULT_ELASTIC_IP}
-
 if [ "$COMMAND" == "initialize" ]; then
     echo "Using provided Elastic IP: $ELASTIC_IP"
 
@@ -30,9 +16,9 @@ if [ "$COMMAND" == "initialize" ]; then
         kill -9 "$PORT_PID"
     fi
 
-    # Start the container
+    # Start the container with both ports exposed
     echo "Starting a new container named '$CONTAINER_NAME'..."
-    docker run -itd -p 8888:8888 --name "$CONTAINER_NAME" collaborative-env jupyter
+    docker run -itd -p 8888:8888 -p 8080:8080 --name "$CONTAINER_NAME" collaborative-env jupyter
     CONTAINER_ID=$(docker ps --filter "name=$CONTAINER_NAME" --quiet)
 
     echo "Activating Python virtual environment at $VENV_PATH..."
@@ -48,12 +34,3 @@ if [ "$COMMAND" == "initialize" ]; then
     else
         echo "Failed to retrieve JupyterLab token. Check the container logs for details."
     fi
-
-elif [ "$COMMAND" == "start" ]; then
-    # Start an existing container
-    echo "Attaching to the running container: $CONTAINER_NAME"
-    docker exec -it "$CONTAINER_NAME" bash
-else
-    echo "Invalid command. Usage: ./manage_jupyterlab.sh {initialize|start} [container_name] [elastic_ip]"
-fi
-
