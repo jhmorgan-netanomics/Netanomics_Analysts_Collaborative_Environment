@@ -43,6 +43,7 @@ RUN apt-get update && \
         openbox \
         python3-tk \
         pkg-config \
+        unzip \
         git && \
     apt-get clean
 
@@ -53,13 +54,20 @@ ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfi
 # 2. Add System Fonts
 # ----------------------------------------
 
-# Update package lists and install Microsoft core fonts
-RUN apt-get update && apt-get install -y \
-    ttf-mscorefonts-installer \
-    && fc-cache -fv
+# Create a directory for custom fonts
+RUN mkdir -p /usr/share/fonts/truetype/custom
+
+# Fetch fonts from your GitHub repository and place them in the custom fonts directory
+RUN curl -L -o /tmp/fonts.zip https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collaborative_Environment/archive/refs/heads/main.zip \
+    && unzip /tmp/fonts.zip 'Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/*' -d /tmp/ \
+    && mkdir -p /usr/share/fonts/truetype/custom/ \
+    && cp /tmp/Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/* /usr/share/fonts/truetype/custom/ \
+    && fc-cache -fv \
+    && rm -rf /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
+
 
 # Clean up to reduce image size
-RUN apt-get clean && rm -rf /var/lib/apt/lists/*
+RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
 
 # ----------------------------------------
 # 3. Install Dataplot
