@@ -536,6 +536,16 @@ COPY configure_vscode.sh /usr/local/bin/configure_vscode.sh
 RUN chmod +x /usr/local/bin/configure_vscode.sh
 RUN /usr/local/bin/configure_vscode.sh
 
+# Create the .lintr VSCode configuration file in the project directory
+RUN echo "linters: with_defaults(\n\
+    line_length_linter = line_length_linter(120), # Increase line length limit to 120 characters\n\
+    object_name_linter = NULL,                   # Disable object naming style checks\n\
+    assignment_linter = assignment_linter('<-') # Enforce '<-' for assignment\n\
+)" > /workspace/.lintr
+
+# Set the .lintr file as the configuration for linting
+ENV LINTR_CONFIG=/workspace/.lintr
+
 # Copy start_workspace.sh directly into the image
 COPY start_workspace.sh /usr/local/bin/start_workspace.sh
 RUN chmod +x /usr/local/bin/start_workspace.sh
