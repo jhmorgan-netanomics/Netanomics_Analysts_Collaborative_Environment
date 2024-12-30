@@ -538,10 +538,11 @@ RUN /usr/local/bin/configure_vscode.sh
 
 # Create the .lintr VSCode configuration file in the project directory
 RUN echo "linters: with_defaults(\n\
-    line_length_linter = line_length_linter(120), # Increase line length limit to 120 characters\n\
-    object_name_linter = NULL,                   # Disable object naming style checks\n\
-    assignment_linter = assignment_linter('<-') # Enforce '<-' for assignment\n\
-)" > /workspace/.lintr
+    line_length_linter = line_length_linter(120),\n\
+    object_name_linter = NULL,\n\
+    assignment_linter = assignment_linter('<-')\n\
+)\n" > /workspace/.lintr
+
 
 # Set the .lintr file as the configuration for linting
 ENV LINTR_CONFIG=/workspace/.lintr
