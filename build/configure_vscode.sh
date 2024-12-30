@@ -11,7 +11,8 @@ cat <<EOL > /workspace/.vscode/settings.json
     "terminal.integrated.fontFamily": "monospace",
     "julia.additionalArgs": [
         "--banner=yes"
-    ]
+    ],
+    "r.lsp.diagnostics": false
 }
 EOL
 
