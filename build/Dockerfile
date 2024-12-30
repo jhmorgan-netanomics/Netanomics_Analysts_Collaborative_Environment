@@ -51,7 +51,7 @@ RUN apt-get update && \
 ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/share/pkgconfig"
 
 # ----------------------------------------
-# 2. Add System Fonts
+# 2. Add System Fonts & Configure Locales
 # ----------------------------------------
 
 # Create a directory for custom fonts
@@ -65,6 +65,14 @@ RUN curl -L -o /tmp/fonts.zip https://github.com/jhmorgan-netanomics/Netanomics_
     && fc-cache -fv \
     && rm -rf /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
 
+# Configure locales
+RUN apt-get update && apt-get install -y locales \
+    && locale-gen en_US.UTF-8 \
+    && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
+
+# Set environment variables for the locales
+ENV LANG=en_US.UTF-8 \
+    LC_ALL=en_US.UTF-8
 
 # Clean up to reduce image size
 RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
@@ -286,7 +294,9 @@ RUN mkdir -p /root/.julia/config && \
 # Create .Renviron in the user's home directory and add environment variables
 RUN echo 'JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.Renviron && \
     echo 'PYTHON="/usr/bin/python3"' >> /root/.Renviron && \
-    echo 'CURL="/usr/bin/curl"' >> /root/.Renviron
+    echo 'CURL="/usr/bin/curl"' >> /root/.Renviron && \
+    echo 'LANG="en_US.UTF-8"' >> /root/.Renviron && \
+    echo 'LC_ALL="en_US.UTF-8"' >> /root/.Renviron
  
 # ----------------------------------------
 # 9. Add Bash Configuration (.bashrc)
