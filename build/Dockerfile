@@ -224,33 +224,18 @@ RUN wget "https://rstudio.org/download/latest/stable/server/${UBUNTU_CODENAME}/r
     gdebi -n rstudio-server.deb && \
     rm rstudio-server.deb
 
-# Create the 'netanomics' user with password and administrative privileges
-RUN useradd -m netanomics && \
-    echo "netanomics:omen" | chpasswd && \
-    usermod -aG sudo netanomics && \
-    echo "netanomics ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
-
 # Configure RStudio
 RUN ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin && \
     ln -fs /usr/lib/rstudio-server/bin/rserver /usr/local/bin && \
     echo "rsession-which-r=$(which R)" > /etc/rstudio/rserver.conf && \
     echo "auth-none=1" >> /etc/rstudio/rserver.conf && \
-    echo "www-frame-origin=same" >> /etc/rstudio/rserver.conf && \
-    echo "server-user=netanomics" >> /etc/rstudio/rserver.conf && \
-    chown netanomics:netanomics /etc/rstudio/rserver.conf
-
-# Create necessary directories and set permissions for RStudio logging
-RUN mkdir -p /var/log/rstudio-server /var/lib/rstudio-server /var/run/rstudio-server && \
-    chown -R netanomics:netanomics /var/log/rstudio-server && \
-    chown -R netanomics:netanomics /var/lib/rstudio-server && \
-    chown -R netanomics:netanomics /var/run/rstudio-server
+    echo "www-frame-origin=same" >> /etc/rstudio/rserver.conf
 
 # Configure logging for RStudio
 RUN echo '[*]' > /etc/rstudio/logging.conf && \
     echo 'log-level=info' >> /etc/rstudio/logging.conf && \
     echo 'logger-type=file' >> /etc/rstudio/logging.conf && \
-    echo 'log-dir=/var/log/rstudio-server' >> /etc/rstudio/logging.conf && \
-    chown netanomics:netanomics /etc/rstudio/logging.conf
+    echo 'log-dir=/var/log/rstudio-server' >> /etc/rstudio/logging.conf
 
 # Expose RStudio port
 EXPOSE 8787
@@ -596,9 +581,13 @@ RUN chmod +x /usr/local/bin/start_jupyterlab.sh
 # Expose JupyterLab's default port
 EXPOSE 8888
 
-# Copy start_rstudio.sh into the image
-COPY start_rstudio.sh /usr/local/bin/start_rstudio.sh
-RUN chmod +x /usr/local/bin/start_rstudio.sh
+# Copy update_rstudio.sh into the image
+COPY update_rstudio.sh /usr/local/bin/update_rstudio.sh
+RUN chmod +x /usr/local/bin/update_rstudio.sh
+
+# Copy start_rstudio_server.sh into the image
+COPY start_rstudio_server.sh /usr/local/bin/start_rstudio_server.sh
+RUN chmod +x /usr/local/bin/start_rstudio_server.sh
 
 # Generate a basic Openbox menu file to avoid missing menu warnings
 RUN mkdir -p /var/lib/openbox && \
@@ -606,7 +595,7 @@ RUN mkdir -p /var/lib/openbox && \
     echo "Openbox menu file created at /var/lib/openbox/debian-menu.xml"
 
 # Set permissions for workspace directory
-RUN mkdir -p /workspace && chown -R netanomics:netanomics /workspace
+RUN mkdir -p /workspace
 
 # Default to root user
 USER root
