@@ -1,7 +1,8 @@
 #!/bin/bash
 
-# Debug: Print the value of DISPLAY
+# Debug: Print the value of DISPLAY and current user
 echo "DEBUG: Current DISPLAY is: '${DISPLAY}'"
+echo "DEBUG: Current user is: $(whoami)"
 
 # Check and configure Git user.name
 if ! git config --global user.name &> /dev/null; then
@@ -17,20 +18,26 @@ if ! git config --global user.email &> /dev/null; then
     git config --global user.email "$git_user_email"
 fi
 
+# Check if the first argument is "rstudio"
+if [ "$1" == "rstudio" ]; then
+    echo "Starting RStudio Server..."
+    /usr/local/bin/start_rstudio_server.sh
+
 # Check if the first argument is "jupyter"
-if [ "$1" == "jupyter" ]; then
+elif [ "$1" == "jupyter" ]; then
     echo "Starting JupyterLab..."
     /usr/local/bin/start_jupyterlab.sh
+
+# If a DISPLAY environment variable exists
 elif [ -n "$DISPLAY" ]; then
     echo "Using existing DISPLAY: $DISPLAY"
-
-    # Start Openbox for X11 workflows
     echo "Starting Openbox session..."
     openbox &
+    trap "kill $!" EXIT
     exec /bin/bash
+
+# Fallback: No DISPLAY found
 else
     echo "No DISPLAY found. Starting a basic interactive shell..."
     exec /bin/bash
 fi
-
-

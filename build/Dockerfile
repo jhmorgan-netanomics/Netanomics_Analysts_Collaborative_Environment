@@ -10,9 +10,11 @@ ENV DEBIAN_FRONTEND=noninteractive
 # ----------------------------------------
 # 1. Install Dependencies
 # ----------------------------------------
-RUN apt-get update && \
-    echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
+
+# Pre-seed tzdata to avoid interactive prompts and install tzdata
+RUN echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
     echo "tzdata tzdata/Zones/America select New_York" | debconf-set-selections && \
+    apt-get update && apt-get install -y tzdata && \
     DEBIAN_FRONTEND=noninteractive apt-get install -y \
         wget \
         curl \
@@ -207,7 +209,54 @@ RUN ln -s /usr/bin/R /usr/local/bin/R && \
     ln -s /usr/bin/Rscript /usr/local/bin/Rscript
 
 # ----------------------------------------
-# 6. Install Python and Required Packages
+# 6. Install RStudio Server
+# ----------------------------------------
+
+# Install dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates gdebi-core git libssl-dev wget
+
+# Set UBUNTU_CODENAME for compatibility
+ENV UBUNTU_CODENAME="jammy"
+
+# Download and install RStudio Server
+RUN wget "https://rstudio.org/download/latest/stable/server/${UBUNTU_CODENAME}/rstudio-server-latest-amd64.deb" -O rstudio-server.deb && \
+    gdebi -n rstudio-server.deb && \
+    rm rstudio-server.deb
+
+# Create the 'netanomics' user with password and administrative privileges
+RUN useradd -m netanomics && \
+    echo "netanomics:omen" | chpasswd && \
+    usermod -aG sudo netanomics && \
+    echo "netanomics ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+
+# Configure RStudio
+RUN ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin && \
+    ln -fs /usr/lib/rstudio-server/bin/rserver /usr/local/bin && \
+    echo "rsession-which-r=$(which R)" > /etc/rstudio/rserver.conf && \
+    echo "auth-none=1" >> /etc/rstudio/rserver.conf && \
+    echo "www-frame-origin=same" >> /etc/rstudio/rserver.conf && \
+    echo "server-user=netanomics" >> /etc/rstudio/rserver.conf && \
+    chown netanomics:netanomics /etc/rstudio/rserver.conf
+
+# Create necessary directories and set permissions for RStudio logging
+RUN mkdir -p /var/log/rstudio-server /var/lib/rstudio-server /var/run/rstudio-server && \
+    chown -R netanomics:netanomics /var/log/rstudio-server && \
+    chown -R netanomics:netanomics /var/lib/rstudio-server && \
+    chown -R netanomics:netanomics /var/run/rstudio-server
+
+# Configure logging for RStudio
+RUN echo '[*]' > /etc/rstudio/logging.conf && \
+    echo 'log-level=info' >> /etc/rstudio/logging.conf && \
+    echo 'logger-type=file' >> /etc/rstudio/logging.conf && \
+    echo 'log-dir=/var/log/rstudio-server' >> /etc/rstudio/logging.conf && \
+    chown netanomics:netanomics /etc/rstudio/logging.conf
+
+# Expose RStudio port
+EXPOSE 8787
+
+# ----------------------------------------
+# 7. Install Python and Required Packages
 # ----------------------------------------
 
 # Install Python 3 and pip
@@ -250,7 +299,7 @@ RUN [ ! -e /usr/local/bin/python ] && ln -s /usr/bin/python3 /usr/local/bin/pyth
     [ ! -e /usr/local/bin/pip ] && ln -s /usr/bin/pip3 /usr/local/bin/pip || true
 
 # ----------------------------------------
-# 7. Add Julia Configuration (startup.jl)
+# 8. Add Julia Configuration (startup.jl)
 # ----------------------------------------
  
 # Create .julia/config directory and write startup.jl
@@ -288,7 +337,7 @@ RUN mkdir -p /root/.julia/config && \
     echo 'end' >> /root/.julia/config/startup.jl
  
 # ----------------------------------------
-# 8. Add R Configuration (.Renviron)
+# 9. Add R Configuration (.Renviron)
 # ----------------------------------------
  
 # Create .Renviron in the user's home directory and add environment variables
@@ -299,7 +348,7 @@ RUN echo 'JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.Renviron && \
     echo 'LC_ALL="en_US.UTF-8"' >> /root/.Renviron
  
 # ----------------------------------------
-# 9. Add Bash Configuration (.bashrc)
+# 10. Add Bash Configuration (.bashrc)
 # ----------------------------------------
  
 # Add environment variables to .bashrc
@@ -308,7 +357,7 @@ RUN echo 'export JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.bashrc && \
     echo 'export CURL="/usr/bin/curl"' >> /root/.bashrc
  
 # ----------------------------------------
-# 10. Install Interoperability Packages
+# 11. Install Interoperability Packages
 # ----------------------------------------
  
 # Install PyCall, RCall, and PythonCall in Julia
@@ -352,7 +401,7 @@ RUN git clone https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collabo
 RUN python3 /workspace/init_pyjulia.py
 
 # ----------------------------------------
-# 11. Installing Graphviz
+# 12. Installing Graphviz
 # ----------------------------------------
 
 RUN apt-get update && \
@@ -371,7 +420,7 @@ RUN dot -V
 RUN ln -s /usr/bin/dot /usr/local/bin/dot
 
 # ----------------------------------------
-# 12. Install Generic Mapping Tools (GMT)
+# 13. Install Generic Mapping Tools (GMT)
 # ----------------------------------------
 
 # Install GMT from the official repository
@@ -395,33 +444,29 @@ RUN gmt --version && \
 RUN ln -s /usr/bin/gmt /usr/local/bin/gmt
 
 # ----------------------------------------
-# 13. Optional: Install Dropbox Integration
+# 14. Optional: Install Dropbox Integration
 # ----------------------------------------
 
 # Install Dropbox Python SDK
 RUN pip3 install --no-cache-dir dropbox
 
-# Copy Dropbox keys (assumes they exist in the build context)
-COPY dropbox_keys.json /tmp/dropbox_keys.json
+# Copy the shell script into the image
+COPY copy_dropbox_keys.sh /usr/local/bin/copy_dropbox_keys.sh
+RUN chmod +x /usr/local/bin/copy_dropbox_keys.sh
+
+# Run the script to conditionally copy dropbox_keys.json
+RUN /usr/local/bin/copy_dropbox_keys.sh
 
 # Copy the Dropbox helper functions
 COPY dropbox_integration.py /workspace/dropbox_integration.py
 COPY dropbox_utils.py /workspace/dropbox_utils.py
 
-# Move keys to a secure location and set proper permissions if they exist
-RUN if [ -f /tmp/dropbox_keys.json ]; then \
-        mkdir -p /root/.config/dropbox_keys && \
-        mv /tmp/dropbox_keys.json /root/.config/dropbox_keys/dropbox_keys.json && \
-        chmod 600 /root/.config/dropbox_keys/dropbox_keys.json; \
-    else \
-        echo "Dropbox keys not provided. Skipping Dropbox integration."; \
-    fi
 
 # ----------------------------------------
-# 14. Optional Google Drive Integration
+# 15. Optional Google Drive Integration
 # ----------------------------------------
 
-# Install required packages
+# Install required packages for Google integration
 RUN pip install --no-cache-dir \
     google-api-python-client \
     google-auth \
@@ -432,8 +477,12 @@ RUN pip install --no-cache-dir \
     PyDrive \
     oauth2client
 
-# Copy Google credentials (assumes they exist in the build context)
-COPY google_credentials.json /tmp/google_credentials.json
+# Copy the shell script to handle the conditional copy of google_credentials.json
+COPY copy_google_credentials.sh /usr/local/bin/copy_google_credentials.sh
+RUN chmod +x /usr/local/bin/copy_google_credentials.sh
+
+# Run the script to conditionally copy google_credentials.json
+RUN /usr/local/bin/copy_google_credentials.sh
 
 # Copy the Google Drive helper functions
 COPY google_integration.py /workspace/google_integration.py
@@ -452,7 +501,7 @@ RUN if [ -f /tmp/google_credentials.json ]; then \
     fi
     
 # ----------------------------------------
-# 15. Install JupyterLab, MetaKernel, and Supporting Kernels
+# 16. Install JupyterLab, MetaKernel, and Supporting Kernels
 # ----------------------------------------
 
 # Install build tools for Python packages
@@ -491,7 +540,7 @@ RUN python3 -c "from PIL import Image, ImageChops; print(\"PIL verified\")"
 RUN python3 -c "import metakernel; print(\"MetaKernel installed successfully\")"
 
 # ----------------------------------------
-# 16. EC2 IO Tools
+# 17. EC2 IO Tools
 # ----------------------------------------
 
 # Install necessary tools: SSH client, Docker CLI, and basic utilities
@@ -509,7 +558,7 @@ COPY docker_utils.sh /root/docker_utils.sh
 RUN echo 'source /root/docker_utils.sh' >> /root/.bashrc
 
 # ----------------------------------------
-# 17. Add dbus and configure workspace
+# 18. Add dbus and configure workspace
 # ----------------------------------------
 
 # Install dbus and dependencies
@@ -522,7 +571,7 @@ RUN mkdir -p /run/user/1000 && chmod 700 /run/user/1000
 ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
 
 # ----------------------------------------
-# 18. Create Workspace Directory and Setup
+# 19. Create Workspace Directory and Setup
 # ----------------------------------------
 
 # Install PyXDG for Openbox
@@ -547,12 +596,21 @@ RUN chmod +x /usr/local/bin/start_jupyterlab.sh
 # Expose JupyterLab's default port
 EXPOSE 8888
 
+# Copy start_rstudio.sh into the image
+COPY start_rstudio.sh /usr/local/bin/start_rstudio.sh
+RUN chmod +x /usr/local/bin/start_rstudio.sh
+
 # Generate a basic Openbox menu file to avoid missing menu warnings
 RUN mkdir -p /var/lib/openbox && \
     echo '<openbox_menu></openbox_menu>' > /var/lib/openbox/debian-menu.xml && \
     echo "Openbox menu file created at /var/lib/openbox/debian-menu.xml"
 
+# Set permissions for workspace directory
+RUN mkdir -p /workspace && chown -R netanomics:netanomics /workspace
+
+# Default to root user
+USER root
+
 # Specifying Entry Point
 ENTRYPOINT ["/usr/local/bin/start_workspace.sh"]
 CMD []
-

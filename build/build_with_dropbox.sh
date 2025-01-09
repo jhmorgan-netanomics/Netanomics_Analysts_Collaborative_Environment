@@ -34,7 +34,7 @@ while [[ $# -gt 0 ]]; do
     esac
 done
 
-# Check for dropbox_keys.json
+# Check for dropbox_keys.json and create a placeholder if not present
 if [ -f "$DROPBOX_KEYS" ]; then
     echo "Dropbox keys found. Proceeding with integration..."
 else
@@ -43,7 +43,7 @@ else
     DROPBOX_PLACEHOLDER_CREATED=true
 fi
 
-# Check for google_credentials.json
+# Check for google_credentials.json and create a placeholder if not present
 if [ -f "$GOOGLE_KEYS" ]; then
     echo "Google credentials found. Proceeding with integration..."
 else
@@ -82,4 +82,3 @@ docker run \
     -v "$PYTHON_CACHE:/root/.cache/pip" \
     -v "$R_CACHE:/root/.cache/R" \
     -it "$TAG_NAME" /bin/bash
-
