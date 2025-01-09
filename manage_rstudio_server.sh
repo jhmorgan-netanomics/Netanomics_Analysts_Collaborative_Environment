@@ -1,40 +1,65 @@
 #!/bin/bash
 
-# Usage: ./manage_rstudio.sh [container_name] [elastic_ip]
-DEFAULT_CONTAINER_NAME="BEND"
-DEFAULT_ELASTIC_IP="52.70.230.30"
+# Usage: ./manage_rstudio_server.sh [container_name] [ip_address] [port]
 
+# Defaults
+DEFAULT_CONTAINER_NAME="collaborative-env-rstudio"
+DEFAULT_IP="127.0.0.1"
+DEFAULT_PORT="8787"
+
+# Parse arguments
 CONTAINER_NAME=${1:-$DEFAULT_CONTAINER_NAME}
-ELASTIC_IP=${2:-$DEFAULT_ELASTIC_IP}
+IP=${2:-$DEFAULT_IP}
+PORT=${3:-$DEFAULT_PORT}
 
-echo "Managing RStudio Server for container: $CONTAINER_NAME"
-echo "Using IP address: $ELASTIC_IP"
+echo "Managing RStudio Server for container: $CONTAINER_NAME on IP: $IP and port: $PORT"
 
-# Check if the container exists (running or stopped)
+# Function to check if a port is in use and free it
+check_and_free_port() {
+    local port_to_check=$1
+    local pid
+    pid=$(lsof -ti :"$port_to_check")
+    if [ -n "$pid" ]; then
+        echo "Port $port_to_check is already in use by PID $pid. Terminating the process..."
+        kill -9 "$pid"
+        echo "Freed port $port_to_check."
+    fi
+}
+
+# Free the specified port
+check_and_free_port "$PORT"
+
+# Check if the container is running
+RUNNING_CONTAINER=$(docker ps --filter "name=$CONTAINER_NAME" --quiet)
+
+if [ -n "$RUNNING_CONTAINER" ]; then
+    echo "A running container with the name '$CONTAINER_NAME' exists."
+    echo "Attaching to the container to start RStudio Server..."
+    docker exec -it "$CONTAINER_NAME" /usr/local/bin/start_rstudio_server.sh
+    exit 0
+fi
+
+# Check if the container exists (stopped or running)
 EXISTING_CONTAINER=$(docker ps -a --filter "name=$CONTAINER_NAME" --quiet)
 
 if [ -n "$EXISTING_CONTAINER" ]; then
-    RUNNING_CONTAINER=$(docker ps --filter "name=$CONTAINER_NAME" --quiet)
-    
-    if [ -n "$RUNNING_CONTAINER" ]; then
-        echo "Container '$CONTAINER_NAME' is already running. Attaching..."
-        docker exec -it "$CONTAINER_NAME" /usr/local/bin/start_rstudio_server.sh
-    else
-        echo "Starting existing container '$CONTAINER_NAME'..."
-        docker start "$CONTAINER_NAME"
-        docker exec -it "$CONTAINER_NAME" /usr/local/bin/start_rstudio_server.sh
-    fi
-else
-    echo "Creating and starting a new container: $CONTAINER_NAME"
-    docker run -itd \
-        -p 8787:8787 \
-        -v /path/to/R/packages:/home/rstudio/R \
-        -v /path/to/Julia/packages:/home/rstudio/.julia \
-        -v /path/to/Python/packages:/home/rstudio/.local/lib/python3.8/site-packages \
-        --name "$CONTAINER_NAME" collaborative-env
+    echo "Starting the existing container: $CONTAINER_NAME"
+    docker start "$CONTAINER_NAME"
+    echo "Attaching to the container to start RStudio Server..."
     docker exec -it "$CONTAINER_NAME" /usr/local/bin/start_rstudio_server.sh
+    exit 0
 fi
 
-# Provide user instructions
-echo "RStudio Server is now running."
-echo "Access it at: http://$ELASTIC_IP:8787"
+# If no container exists, create a new one
+echo "Creating and starting a new container: $CONTAINER_NAME on port $PORT"
+docker run -itd -p "$PORT:8787" --name "$CONTAINER_NAME" collaborative-env
+
+# Verify the container creation
+if [ $? -eq 0 ]; then
+    echo "Container $CONTAINER_NAME created successfully."
+    echo "Attaching to the container to initialize RStudio Server..."
+    docker exec -it "$CONTAINER_NAME" /usr/local/bin/start_workspace.sh rstudio
+else
+    echo "Error: Failed to create the container $CONTAINER_NAME."
+    exit 1
+fi
