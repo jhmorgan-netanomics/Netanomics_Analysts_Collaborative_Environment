@@ -79,15 +79,19 @@ If no arguments are provided, the script uses the default values and creates a n
 
 ---
 
-### Managing JupyterLab
+### `manage_jupyterlab.sh`
 
-To manage JupyterLab containers, use the `manage_jupyterlab.sh` script:
+#### Overview
+The `manage_jupyterlab.sh` script is designed to manage a JupyterLab container within the `collaborative-env` Docker environment. It checks if the container exists and starts or creates it as needed, ensuring that JupyterLab is accessible on the specified IP address and port. The script also ensures that any conflicting processes using the specified port are terminated before launching the JupyterLab server.
 
+#### Features
+- Automatically checks and frees a specified port if it's already in use.
+- Attaches to an existing running container if found.
+- Starts a stopped container or creates a new one if none exists.
+- Can run without arguments, automatically creating a new container with default settings.
+
+#### Usage
 ```bash
-# Usage: ./manage_jupyterlab.sh [container_name] [ip_address] [port]
-./manage_jupyterlab.sh BEND 52.70.230.30 8888
-```
-
-This script allows you to manage JupyterLab workflows by starting or attaching to existing containers, ensuring a seamless user experience.
+./manage_jupyterlab.sh [container_name] [ip_address] [port]
 
 ---
