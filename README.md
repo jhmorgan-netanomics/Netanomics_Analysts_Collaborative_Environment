@@ -94,4 +94,15 @@ The `manage_jupyterlab.sh` script is designed to manage a JupyterLab container w
 ```bash
 ./manage_jupyterlab.sh [container_name] [ip_address] [port]
 
+#### Usage
+```bash
+./manage_jupyterlab.sh [container_name] [ip_address] [port]
+
+```
+- **`container_name`**: (Optional) Name of the container. Defaults to collaborative-env-jupyter.
+- **`ip_address`**: (Optional) IP address to bind the server. Defaults to `127.0.0.1`.
+- **`port`**: (Optional) Port to expose JupyterLab. Defaults to 8888.
+
+If no arguments are provided, the script uses the default values and creates a new container if one does not exist.
+
 ---
