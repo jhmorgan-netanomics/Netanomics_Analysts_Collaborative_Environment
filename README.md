@@ -53,6 +53,25 @@ cd Netanomics_Analysts_Collaborative_Environment
 
 ## Usage
 
+### `manage_rstudio_server.sh`
+
+#### Overview
+The `manage_rstudio_server.sh` script is designed to manage an RStudio Server container within the `collaborative-env` Docker environment. It checks if the container exists and starts or creates it as needed, ensuring that the RStudio Server is accessible on the specified IP address and port. This script streamlines container management and ensures that any conflicting processes using the specified port are terminated before launching the server.
+
+#### Features:
+- Automatically checks and frees a specified port if it's already in use.
+- Attaches to an existing running container if found.
+- Starts a stopped container or creates a new one if none exists.
+- Can run without arguments, automatically creating a new container with default settings.
+
+#### Usage
+```bash
+./manage_rstudio_server.sh [container_name] [ip_address] [port]
+container_name: (Optional) Name of the container. Defaults to collaborative-env-rstudio.
+ip_address: (Optional) IP address to bind the server. Defaults to 127.0.0.1.
+port: (Optional) Port to expose RStudio Server. Defaults to 8787.
+If no arguments are provided, the script uses the default values and creates a new container if one does not exist.
+
 ### Managing JupyterLab
 
 To manage JupyterLab containers, use the `manage_jupyterlab.sh` script:
