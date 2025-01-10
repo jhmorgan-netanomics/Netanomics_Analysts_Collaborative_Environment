@@ -35,7 +35,7 @@ To use the Netanomics Collaborative Environment, ensure you have the following i
 
 1. **Docker**: [Install Docker](https://docs.docker.com/get-docker/)
 2. **Shell Access**: The ability to execute Bash scripts.
-3. **x11docker**: For managing X11 forwarding and Xephyr environments.
+3. **x11docker**: For managing X11 forwarding and Xephyr environments. This component is not essential, but facilitates the use of terminal-based tools such as NIST Dataplot.
    - [Install x11docker](https://github.com/mviereck/x11docker):
      ```bash
      sudo apt install x11docker
