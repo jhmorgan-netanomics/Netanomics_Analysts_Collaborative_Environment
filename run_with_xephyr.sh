@@ -1,60 +1,61 @@
 #!/bin/bash
 
-# Start Xephyr
-Xephyr :100 -screen 1280x720 &
-XEPHYR_PID=$!
+set -e  # Exit on any error
 
-# Wait a moment to ensure Xephyr starts
+# Detect the active host DISPLAY
+HOST_DISPLAY=${DISPLAY}
+if [ -z "$HOST_DISPLAY" ]; then
+    echo "No active DISPLAY found on the host. Ensure X11 is running."
+    exit 1
+fi
+echo "Detected host DISPLAY: $HOST_DISPLAY"
+
+# Allow connections to the host X server
+if ! xhost + &>/dev/null; then
+    echo "Failed to configure xhost. Exiting."
+    exit 1
+fi
+
+# Dynamically assign Xephyr DISPLAY
+for DISPLAY_NUMBER in $(seq 100 110); do
+    if [ ! -e /tmp/.X${DISPLAY_NUMBER}-lock ]; then
+        export XEphyr_DISPLAY=:$DISPLAY_NUMBER
+        echo "Assigned Xephyr DISPLAY: $XEphyr_DISPLAY"
+        break
+    fi
+done
+
+if [ -z "$XEphyr_DISPLAY" ]; then
+    echo "No available Xephyr DISPLAY found. Exiting."
+    exit 1
+fi
+
+# Start Xephyr
+Xephyr $XEphyr_DISPLAY -screen 1280x720 &
+XEPHYR_PID=$!
+trap 'kill $XEPHYR_PID' EXIT  # Ensure Xephyr is cleaned up on script exit
+
+# Wait for Xephyr to initialize
 sleep 2
 
-# Check if Xephyr started successfully
+# Verify Xephyr started successfully
 if ! ps -p $XEPHYR_PID > /dev/null; then
     echo "Xephyr failed to start. Please check your X11 setup."
     exit 1
 fi
 
-# Set the Xephyr DISPLAY
-export DISPLAY=:100
-echo "Xephyr DISPLAY set to $DISPLAY"
+# Set Xephyr DISPLAY for container
+export DISPLAY=$XEphyr_DISPLAY
+echo "Xephyr DISPLAY set for container: $DISPLAY"
 
-# Allow connections to X server
-if ! xhost +local:; then
-    echo "Failed to configure xhost. Exiting."
-    kill $XEPHYR_PID
-    exit 1
-fi
+# Run the Docker container
+echo "Starting Docker container with DISPLAY=$DISPLAY"
+docker run -it --rm \
+    -e DISPLAY=$DISPLAY \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    collaborative-env
 
-# Parse the argument for a container ID or name
-CONTAINER_ID=$1
-DEFAULT_CONTAINER_NAME="collaborative-env-container"
-
-# Check if a PID or name was provided
-if [ -n "$CONTAINER_ID" ]; then
-    echo "Checking for specified container: $CONTAINER_ID"
-    if docker ps -a --format '{{.ID}} {{.Names}}' | grep -qE "^${CONTAINER_ID}| ${CONTAINER_ID}$"; then
-        echo "Attaching to specified container: $CONTAINER_ID"
-        docker start -ai $CONTAINER_ID
-    else
-        echo "Container ID or name $CONTAINER_ID not found. Exiting."
-        kill $XEPHYR_PID
-        exit 1
-    fi
-else
-    # No container ID provided, default to collaborative-env-container
-    echo "No container ID provided. Checking for default container: $DEFAULT_CONTAINER_NAME"
-    if docker ps -a --format '{{.Names}}' | grep -q "^${DEFAULT_CONTAINER_NAME}$"; then
-        echo "Attaching to existing container: $DEFAULT_CONTAINER_NAME"
-        docker start -ai $DEFAULT_CONTAINER_NAME
-    else
-        echo "Starting a new container: $DEFAULT_CONTAINER_NAME"
-        docker run -it --name $DEFAULT_CONTAINER_NAME \
-            --env DISPLAY=$DISPLAY \
-            -v /tmp/.X11-unix:/tmp/.X11-unix \
-            collaborative-env
-    fi
-fi
-
-# Clean up: Kill Xephyr process after the container exits
+# Clean up Xephyr when the container exits
 echo "Stopping Xephyr..."
 kill $XEPHYR_PID
 echo "Xephyr process stopped."
