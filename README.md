@@ -2,7 +2,7 @@
 
 The Netanomics Collaborative Environment provides an integrated workspace for **Julia**, **R**, and **Python**, enabling analysts to collaborate within an integrated and scaleable environment.
 
-This environment also supports terminal-based tools such as **CmdStan**, **NIST Dataplot**, **Generic Mapping Tools (GMT)**, and **Graphviz**, with **VSCode settings** for effortless development. Whether you're using JupyterLab, RStudio Server, or terminal workflows, this setup ensures consistency and ease of use.
+This environment also supports terminal-based tools such as **CmdStan**, **NIST Dataplot**, **Generic Mapping Tools (GMT)**, and **Graphviz**, with **VSCode settings** for streamlined development. Whether you're using JupyterLab, RStudio Server, or terminal workflows, this setup ensures consistency and ease of use.
 
 ---
 
