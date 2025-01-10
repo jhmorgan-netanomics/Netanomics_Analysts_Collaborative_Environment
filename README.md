@@ -13,6 +13,7 @@ This environment also supports terminal-based tools such as **CmdStan**, **NIST 
 - **JupyterLab**: A flexible and interactive interface for Python, Julia, and R workflows, perfect for notebooks and exploratory analysis.
 
 ### Terminal-Based Applications:
+- **CmdStan**: A command-line tool for probabilistic modeling.
 - **NIST Dataplot**: A command-line tool for statistical analysis and visualization.
 - **Generic Mapping Tools (GMT)**: Create high-quality geographic maps directly from the command line.
 - **Graphviz**: Generate graph visualizations programmatically for analysis and presentations.
