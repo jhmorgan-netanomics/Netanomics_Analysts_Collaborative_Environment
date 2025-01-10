@@ -50,6 +50,9 @@ To use the Netanomics Collaborative Environment, ensure you have the following i
 ```bash
 git clone https://github.com/jhmorgan-Netanomics/Netanomics_Analysts_Collaborative_Environment.git
 cd Netanomics_Analysts_Collaborative_Environment
+```
+
+---
 
 ## Usage
 
@@ -58,7 +61,7 @@ cd Netanomics_Analysts_Collaborative_Environment
 #### Overview
 The `manage_rstudio_server.sh` script is designed to manage an RStudio Server container within the `collaborative-env` Docker environment. It checks if the container exists and starts or creates it as needed, ensuring that the RStudio Server is accessible on the specified IP address and port. This script streamlines container management and ensures that any conflicting processes using the specified port are terminated before launching the server.
 
-#### Features:
+#### Features
 - Automatically checks and frees a specified port if it's already in use.
 - Attaches to an existing running container if found.
 - Starts a stopped container or creates a new one if none exists.
@@ -67,10 +70,14 @@ The `manage_rstudio_server.sh` script is designed to manage an RStudio Server co
 #### Usage
 ```bash
 ./manage_rstudio_server.sh [container_name] [ip_address] [port]
-container_name: (Optional) Name of the container. Defaults to collaborative-env-rstudio.
-ip_address: (Optional) IP address to bind the server. Defaults to 127.0.0.1.
-port: (Optional) Port to expose RStudio Server. Defaults to 8787.
+```
+- **`container_name`**: (Optional) Name of the container. Defaults to `collaborative-env-rstudio`.
+- **`ip_address`**: (Optional) IP address to bind the server. Defaults to `127.0.0.1`.
+- **`port`**: (Optional) Port to expose RStudio Server. Defaults to `8787`.
+
 If no arguments are provided, the script uses the default values and creates a new container if one does not exist.
+
+---
 
 ### Managing JupyterLab
 
@@ -79,3 +86,8 @@ To manage JupyterLab containers, use the `manage_jupyterlab.sh` script:
 ```bash
 # Usage: ./manage_jupyterlab.sh [container_name] [ip_address] [port]
 ./manage_jupyterlab.sh BEND 52.70.230.30 8888
+```
+
+This script allows you to manage JupyterLab workflows by starting or attaching to existing containers, ensuring a seamless user experience.
+
+---
