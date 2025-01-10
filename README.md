@@ -122,4 +122,31 @@ The `run_with_xephyr.sh` script is designed to facilitate X11 forwarding for gra
 This script runs without additional arguments and automatically configures the Xephyr environment for the container. Ensure that X11 is running on the host system before executing the script.
 
 ---
+---
+
+### `start_workspace.sh`
+
+#### Overview
+The `start_workspace.sh` script initializes the workspace for the `collaborative-env` Docker container. It handles user account setup, Git configuration, and workflow initialization, ensuring a flexible environment for a variety of use cases. This function can both be called by the host functions described previously or used within the container to initiate a workflow.
+
+#### Features
+- Configures `git` globally if not already set, prompting the user for `user.name` and `user.email`.
+- Checks for the existence of the `netanomics` user and prompts for a new user account if it doesn’t exist.
+- Updates RStudio Server configuration for the current or newly created user.
+- Initializes the specified workflow (`rstudio`, `jupyter`, or X11 with Openbox).
+- Defaults to an interactive shell if no `DISPLAY` is available.
+
+#### Usage
+```bash
+./start_workspace.sh [workflow]
+```
+- **`workflow`**: (Optional) Specifies the workflow to start. Accepted values are:
+  - `rstudio`: Starts RStudio Server.
+  - `jupyter`: Starts JupyterLab.
+  - (No argument): Starts an X11 session with Openbox or an interactive shell if no `DISPLAY` is set.
+
+If no arguments are provided, the script attempts to start an X11 session or falls back to a basic shell.
+
+---
+
 
