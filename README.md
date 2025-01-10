@@ -121,8 +121,9 @@ The `run_with_xephyr.sh` script is designed to facilitate X11 forwarding for gra
 
 #### Usage
 ```bash
-./run_with_xephyr.sh
+./run_with_xephyr.sh [container_name]
 ```
+- **`container_name`**: (Optional) Name of the container. Attaches to the container if it is running.
 
 This script runs without additional arguments and automatically configures the Xephyr environment for the container. Ensure that X11 is running on the host system before executing the script.
 
