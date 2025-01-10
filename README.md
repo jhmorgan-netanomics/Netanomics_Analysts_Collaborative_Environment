@@ -101,3 +101,25 @@ The `manage_jupyterlab.sh` script is designed to manage a JupyterLab container w
 If no arguments are provided, the script uses the default values and creates a new container if one does not exist.
 
 ---
+
+### `run_with_xephyr.sh`
+
+#### Overview
+The `run_with_xephyr.sh` script is designed to facilitate X11 forwarding for graphical applications within the `collaborative-env` Docker container. It uses Xephyr to create an isolated X server environment for the container, ensuring that GUI-based workflows can be displayed on the host system.
+
+#### Features
+- Dynamically assigns an available `DISPLAY` for Xephyr.
+- Configures `xhost` to allow host X server connections.
+- Launches Xephyr with a resolution of `1280x720`.
+- Passes the Xephyr `DISPLAY` and X11 socket to the Docker container.
+- Cleans up the Xephyr process when the container exits.
+
+#### Usage
+```bash
+./run_with_xephyr.sh
+```
+
+This script runs without additional arguments and automatically configures the Xephyr environment for the container. Ensure that X11 is running on the host system before executing the script.
+
+---
+
