@@ -56,7 +56,7 @@ RUNNING_CONTAINER=$(docker ps --filter "name=$CONTAINER_NAME" --quiet)
 
 if [ -n "$RUNNING_CONTAINER" ]; then
     echo "Attaching to the running container: $CONTAINER_NAME"
-    docker exec -it "$CONTAINER_NAME" bash
+    docker exec -e DISPLAY=$DISPLAY -it "$CONTAINER_NAME" bash -c "openbox & bash"
     exit 0
 fi
 
@@ -66,7 +66,7 @@ EXISTING_CONTAINER=$(docker ps -a --filter "name=$CONTAINER_NAME" --quiet)
 if [ -n "$EXISTING_CONTAINER" ]; then
     echo "Starting the existing container: $CONTAINER_NAME"
     docker start "$CONTAINER_NAME"
-    docker exec -it "$CONTAINER_NAME" bash
+    docker exec -e DISPLAY=$DISPLAY -it "$CONTAINER_NAME" bash -c "openbox & bash"
     exit 0
 fi
 
@@ -76,7 +76,7 @@ docker run -it --rm \
     --name "$CONTAINER_NAME" \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
-    collaborative-env
+    collaborative-env /usr/local/bin/start_workspace.sh
 
 # Clean up Xephyr when the container exits
 echo "Stopping Xephyr..."
