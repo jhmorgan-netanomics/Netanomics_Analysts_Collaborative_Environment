@@ -48,9 +48,32 @@ fi
 export DISPLAY=$XEphyr_DISPLAY
 echo "Xephyr DISPLAY set for container: $DISPLAY"
 
-# Run the Docker container
-echo "Starting Docker container with DISPLAY=$DISPLAY"
+# Container name (default or provided as argument)
+CONTAINER_NAME=${1:-"collaborative-env-xephyr"}
+
+# Check if the container is running
+RUNNING_CONTAINER=$(docker ps --filter "name=$CONTAINER_NAME" --quiet)
+
+if [ -n "$RUNNING_CONTAINER" ]; then
+    echo "Attaching to the running container: $CONTAINER_NAME"
+    docker exec -it "$CONTAINER_NAME" bash
+    exit 0
+fi
+
+# Check if the container exists (but is stopped)
+EXISTING_CONTAINER=$(docker ps -a --filter "name=$CONTAINER_NAME" --quiet)
+
+if [ -n "$EXISTING_CONTAINER" ]; then
+    echo "Starting the existing container: $CONTAINER_NAME"
+    docker start "$CONTAINER_NAME"
+    docker exec -it "$CONTAINER_NAME" bash
+    exit 0
+fi
+
+# Run a new Docker container if no matching container exists
+echo "Creating and starting a new container: $CONTAINER_NAME"
 docker run -it --rm \
+    --name "$CONTAINER_NAME" \
     -e DISPLAY=$DISPLAY \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     collaborative-env

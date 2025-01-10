@@ -154,5 +154,3 @@ The `start_workspace.sh` script initializes the workspace for the `collaborative
 If no arguments are provided, the script attempts to start an X11 session or falls back to a basic shell.
 
 ---
-
-
