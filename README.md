@@ -154,3 +154,45 @@ The `start_workspace.sh` script initializes the workspace for the `collaborative
 If no arguments are provided, the script attempts to start an X11 session or falls back to a basic shell.
 
 ---
+## X11 Forwarding & VSCode
+
+### **1. Configure the Display on Your Local Machine**
+
+On your **local machine**, ensure that SSH is configured to forward X11 traffic. Edit or create the `~/.ssh/config` file with the following content:
+
+```plaintext
+Host your-ec2-instance-name
+    HostName <your-ec2-instance-ip>
+    User <your-username>
+    ForwardX11 yes
+    ForwardX11Trusted yes
+```
+
+Replace the placeholders:
+- **`your-ec2-instance-name`**: A friendly alias for your host (e.g., `ec2-host`).
+- **`<your-ec2-instance-ip>`**: The public IP address of your EC2 instance.
+- **`<your-username>`**: The username for your EC2 instance (e.g., `ubuntu`).
+
+Additionally, add the following conditional export to your `.bashrc` or `.zshrc` file on your local machine to set the `DISPLAY` variable specifically for VSCode's integrated terminal:
+```bash
+if [[ $TERM_PROGRAM == "vscode" ]]; then
+    export DISPLAY=localhost:10.0
+fi
+```
+
+For **Windows users**, add the following line to your PowerShell profile (e.g., `Microsoft.PowerShell_profile.ps1`):
+```powershell
+if ($env:TERM_PROGRAM -eq "vscode") {
+    $env:DISPLAY = "localhost:10.0"
+}
+```
+
+---
+
+#### **Install X11 Tools**
+To use X11 forwarding, you will need an X11 server installed on your local machine:
+
+- **Windows**: Download and install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+- **macOS**: Download and install [XQuartz](https://www.xquartz.org/).
+
+Ensure the X11 server is running before starting your SSH session to the host.
