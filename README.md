@@ -191,6 +191,8 @@ if ($env:TERM_PROGRAM -eq "vscode") {
 
 #### **Install X11 Tools**
 To use X11 forwarding, you will need an X11 server installed on your local machine:
+- `VcXsrv`: Windows Operating Systems
+- `XQuartz`: OsX (Mac) Operating Systems
 
 ### **2. Configure the Display on the Host (EC2 Instance)**
 
