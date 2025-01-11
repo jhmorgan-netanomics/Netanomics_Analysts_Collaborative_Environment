@@ -249,7 +249,7 @@ fi
 
 ### **3. Ensuring the Container Display is set to `:102`**
 
-When using `run_with_xephyr`, the container's `DISPLAY` is automatically set to `:102`, ensuring proper X11 forwarding to the Xephyr window. However, using the **Docker** and **Dev Containers** extensions in VSCode, you can attach to the container environment. In this case, you need to run `source /workspace/.vscode/.bashrc` to ensure that the container's `DISPLAY` environment variable is set correctly. 
+When using `run_with_xephyr`, the container's `DISPLAY` is automatically set to `:102`, ensuring proper X11 forwarding to the Xephyr window. However, using the **Docker** and **Dev Containers** extensions in VSCode, you can attach to the container environment. In this case, you may need to run `source /workspace/.vscode/.bashrc` to ensure that the container's `DISPLAY` environment variable is set correctly. 
 
 A common workflow when working with external environments is to open the container on your local terminal using `run_with_xephyr [container_name]` to initiate a Xephyr display for the container, and then attach VSCode to the container.
 
