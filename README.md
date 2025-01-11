@@ -249,7 +249,21 @@ fi
 
 ### **3. Ensuring the Container Display is set to `:102`**
 
-When using `run_with_xephyr`, the container's `DISPLAY` is automatically set to `:102`, ensuring proper X11 forwarding to the Xephyr window. However, using the **Docker** and **Dev Containers** extensions in VSCode, you can attach to the container environment. In this case, you may need to run `source /workspace/.vscode/.bashrc` to ensure that the container's `DISPLAY` environment variable is set correctly. 
+When using `run_with_xephyr`, the container's `DISPLAY` is automatically set to `:102`, ensuring proper X11 forwarding to the Xephyr window. However, using the **Docker** and **Dev Containers** extensions in VSCode, you can attach to the container environment. In this case, you may need to run `source /workspace/.vscode/.bashrc` to ensure that the container's `DISPLAY` environment variable is set correctly. Alternativey, if you specify the Docker container using the -e argument as shown below, you should not encounter this issue.
+
+```bash
+docker run -itd \
+    --name BEND \
+    -p 8787:8787 \
+    -p 8888:8888 \
+    -v bend_r_packages:/usr/local/lib/R/site-library \
+    -v bend_julia_packages:/root/.julia \
+    -v bend_python_packages:/usr/local/lib/python3.8/site-packages \
+    -v /tmp/.X11-unix:/tmp/.X11-unix \
+    -v bend_workspace:/workspace \
+    -e DISPLAY=:102 \
+     jhm18/netanomics_analysts_collaborative_environment:v1.0 /usr/local/bin/start_workspace.sh
+```
 
 A common workflow when working with external environments is to open the container on your local terminal using `run_with_xephyr [container_name]` to initiate a Xephyr display for the container, and then attach VSCode to the container.
 
