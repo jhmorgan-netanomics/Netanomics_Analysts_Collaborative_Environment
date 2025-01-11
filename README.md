@@ -45,7 +45,13 @@ To use the Netanomics Collaborative Environment, ensure you have the following i
      ```bash
      sudo apt install x11docker
      ```
-   - x11docker is critical for providing secure and functional X11 forwarding within Docker.
+   - Installing x11docker ensures that the dependencies and settings necessary for secure and functional X11 forwarding from within the Docker container are in place.
+   - Run the following command to ensure that all the dependencies installed and the settings are correct:
+     ```bash
+     x11docker --xephyr x11docker/xfce xfce4-terminal
+     ```
+   - To operate the collaboborative environment, you do not need x11docker per se, but you do need its dependencies and settings.
+   - After you have confirmed that you can successfully forwarded applications from the container, it's your choice to retain it. 
 
 ---
 
