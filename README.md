@@ -224,7 +224,7 @@ X11UseLocalhost yes
 Save the file and restart the SSH service to apply the changes:
 
 ```bash
-sudo systemctl restart sshd
+sudo systemctl restart ssh
 ```
 
 ---
