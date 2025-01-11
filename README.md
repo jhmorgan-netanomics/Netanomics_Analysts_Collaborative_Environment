@@ -191,8 +191,10 @@ if ($env:TERM_PROGRAM -eq "vscode") {
 
 #### **Install X11 Tools**
 To use X11 forwarding, you will need an X11 server installed on your local machine:
-- `VcXsrv`: Windows Operating Systems
-- `XQuartz`: OsX (Mac) Operating Systems
+- **Windows**: Download and install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
+- **macOS**: Download and install [XQuartz](https://www.xquartz.org/).
+
+Ensure the X11 server is running before starting your SSH session to the host.
 
 ### **2. Configure the Display on the Host (EC2 Instance)**
 
@@ -238,8 +240,3 @@ fi
 ```
 
 ---
-
-- **Windows**: Download and install [VcXsrv](https://sourceforge.net/projects/vcxsrv/).
-- **macOS**: Download and install [XQuartz](https://www.xquartz.org/).
-
-Ensure the X11 server is running before starting your SSH session to the host.
