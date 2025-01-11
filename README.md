@@ -194,7 +194,7 @@ To use X11 forwarding, you will need an X11 server installed on your local machi
 
 ### **2. Configure the Display on the Host (EC2 Instance)**
 
-If you are running on an EC2 instance, you need to configure the instance to permit X11 forwarding. Follow these steps to ensure proper setup:
+If you are running the **Netanomics Collaborative Environment** on your own EC2 instance, you need to configure the instance to permit X11 forwarding. Follow these steps to ensure proper setup:
 
 #### **1. Update the SSH Daemon Configuration**
 On the **EC2 instance**, edit the SSH daemon configuration file located at `/etc/ssh/sshd_config` to enable X11 forwarding. You will need root or sudo privileges to do this:
