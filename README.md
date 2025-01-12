@@ -15,7 +15,7 @@ docker pull jhm18/netanomics_analysts_collaborative_environment:latest
 
 ### Integrated Development Tools:
 - **RStudio Server**: Access RStudio directly in your browser, enabling R development with server-side execution.
-- **JupyterLab**: A flexible and interactive interface for Python, Julia, and R workflows, perfect for notebooks and exploratory analysis.
+- **JupyterLab**: A flexible and interactive interface for Python, Julia, and R workflows.
 
 ### Terminal-Based Applications:
 - **CmdStan**: A command-line tool for probabilistic modeling.
