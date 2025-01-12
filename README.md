@@ -267,7 +267,7 @@ docker run -itd \
 
 A common workflow when working with external environments is to open the container on your local terminal using `run_with_xephyr [container_name]` to initiate a Xephyr display for the container, and then attach VSCode to the container.
 
-#### **Steps to Set the Correct DISPLAY in the Container**
+#### **Steps to Set the Correct DISPLAY in the Container If Not Already Set**
 1. Attach to the container via **VSCode** or your terminal.
 2. Run the following command to source the `.bashrc` file:
    ```bash
