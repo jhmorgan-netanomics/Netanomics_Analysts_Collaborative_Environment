@@ -116,7 +116,7 @@ If no arguments are provided, the script uses the default values and creates a n
 ### `run_with_xephyr.sh`
 
 #### Overview
-The `run_with_xephyr.sh` script is designed to facilitate X11 forwarding for graphical applications within the `collaborative-env` Docker container. It uses Xephyr to create an isolated X server environment for the container, ensuring that GUI-based workflows can be displayed on the host system.
+The `run_with_xephyr.sh` script is designed to facilitate X11 forwarding for graphical applications within the `collaborative-env` Docker container. It uses Xephyr to create an isolated X server environment for the container, ensuring that GUI-based workflows can be displayed on your local machine.
 
 #### Features
 - Dynamically assigns an available `DISPLAY` for Xephyr.
