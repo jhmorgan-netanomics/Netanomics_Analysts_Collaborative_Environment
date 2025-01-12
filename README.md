@@ -50,7 +50,7 @@ To use the Netanomics Collaborative Environment, ensure you have the following i
      ```bash
      x11docker --xephyr x11docker/xfce xfce4-terminal
      ```
-   - To operate the collaboborative environment, you do not need x11docker image per se, but you do need its dependencies and settings.
+   - To operate the collaboborative environment using remote workflows such as EC2, you do not need x11docker image per se, but you do need its dependencies and settings.
    - After you have confirmed that you can successfully forwarded applications from the container, it's your choice to retain the image. 
 
 ---
