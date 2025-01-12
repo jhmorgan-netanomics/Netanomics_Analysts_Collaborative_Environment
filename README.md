@@ -274,13 +274,6 @@ A common workflow when working with external environments is to open the contain
    source /workspace/.vscode/.bashrc
    ```
 
-#### **What the .bashrc File Does**
-The `.bashrc` file in the `.vscode` directory contains the following content:
-```bash
-# Setting Port to be :102 to Support X11 Forward via Xephyr
-export DISPLAY=:102
-```
-
 Sourcing this file ensures the `DISPLAY` variable is set correctly for your container. You may also run the following command to confirm the `DISPLAY` value after sourcing:
 ```bash
 echo $DISPLAY
