@@ -6,7 +6,7 @@ This environment also supports terminal-based tools such as **CmdStan**, **NIST 
 
 The docker can be pulled using:
  ```bash
-docker pull jhm18/netanomics_analysts_collaborative_environment:latest
+docker pull jhm18/netanomics_analysts_collaborative_environment:v1.0
  ```
 
 ---
