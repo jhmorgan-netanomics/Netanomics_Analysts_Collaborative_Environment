@@ -337,4 +337,70 @@
     # Return to Normal Layout
       par(mfrow = c(1, 1))
   }
+
+# Posterior Distribution with a HDPI
+  posterior_plot <- function(delta_values, plot_titles, x_label, hdpi_setting){
+    # Specifying Layout Matrix
+      layout.matrix <- matrix(c(1), nrow = 1, ncol = 1)
+      layout(mat = layout.matrix) # Widths of the two columns
+      # layout.show(n=4)
+      
+    # Looping through each emotion
+      for (i in seq_along(plot_titles)){
+        # Calculating the Mean & HPDI
+          hpdi <- HPDI(delta_values[[i]], hdpi_setting)
+          lower_hpdi <- hpdi[[1]]
+          upper_hpdi <- hpdi[[2]]
+         
+          posterior_mean <- mean(delta_values[[i]])
+          
+        # Generating the Density
+          delta_density <- density(delta_values[[i]])
+          x_axis <- delta_density$x
+          y_axis <- delta_density$y
+          y_axis <- y_axis/max(y_axis)
+          
+          within_hpdi <- x_axis >= lower_hpdi & x_axis <= upper_hpdi
+          
+        # Creating Base Plot
+          par(mar=c(5,5.5,4,2))
+          plot(NA, xlim = range(x_axis), ylim = range(y_axis), 
+               xlab='', ylab=' ', las=1, main=' ', tck=0.025, 
+               bty='L', cex.axis=1.1, xaxt='n')
+          
+          grid(nx = NA, ny = NULL, col = "gray", lty = "dotted")
+          axis(1, padj=0.75, tck=0.015) 
+          dataplot_tick_function(0.015, 0.40)
+          
+        # Adding Axis Labels
+          mtext(side = 1, text= x_label, line = 3.5, cex = 1)
+          mtext(side = 2, text='Density', 2.5, cex = 1)
+          
+        # Plotting Predictive Posterior Distribution
+          lines(x_axis, y_axis, col='black')
+          
+        # Shade the HPDI region
+          polygon(
+            c(x_axis[within_hpdi], rev(x_axis[within_hpdi])),      # X-coordinates for the shaded region
+            c(y_axis[within_hpdi], rep(0, sum(within_hpdi))),      # Y-coordinates (closing to zero at the edges)
+            col = rgb(187/255, 187/255, 187/255, alpha = 0.25),                 # Adjust color and transparency
+            border = NA
+          )
+          
+        # Adding Reference Line
+          abline(v=0,col='brown',lwd=2, lty=2)
+          
+        # Adding Title
+          title(plot_titles[[i]], family='serif', cex.main=1.5, line=1.25)
+      }
+      
+    # Recording Plot
+      difference_plot <- recordPlot()
+      
+    # Return Plot
+      return(difference_plot )
+      
+    # Return to Normal Layout
+      par(mfrow = c(1, 1))
+  }
   
