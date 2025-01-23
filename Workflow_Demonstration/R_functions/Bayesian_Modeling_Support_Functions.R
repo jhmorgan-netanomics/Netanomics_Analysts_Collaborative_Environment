@@ -164,4 +164,177 @@
     # legend("topright", legend=c("Chain 1", "Chain 2", "Chain 3", "Chain 4"), col=
     #        c(colors[[1]], colors[[2]], colors[[3]], colors[[4]]), lty=1:1, cex=1.3, bty='n')
   }
+
+# Shrinkage Checks
+  shrinkage_check <- function(draws_df, observed_values, prior_term, post_term, iterations=1000){
+    # Isolating Prior Predictive Values
+      y_prior_df <- draws_df[,grepl(prior_term, colnames(draws_df))] 
+    
+    # Sample one value from each column in each iteration of the Prior Predictive Distribution
+      set.seed(123) # For reproducibility
+      prior_density_list <- vector('list', iterations)
+      for (i in seq_along(prior_density_list)){
+        prior_density_list[[i]] <-  density(apply(y_prior_df, 2, function(col) sample(col, 1)))
+      }
+    
+    # Isolating Posterior for y
+      y_pred_df <- draws_df[,grepl(post_term, colnames(draws_df))] 
+    
+    # Number of iterations and columns
+      posterior_density_list <- vector('list', iterations)
+      for (i in seq_along(posterior_density_list)){
+        posterior_density_list[[i]] <-  density(apply(y_pred_df, 2, function(col) sample(col, 1)))
+      }
+      
+    # Scaling the y axes of the Prior & Posterior Distributions to be betwwen 0 and 1
+      prior_density_list <- lapply(prior_density_list, function(d) {
+        d$y <- d$y / max(d$y)  
+        d  
+      })
+      
+      posterior_density_list <- lapply(posterior_density_list, function(d) {
+        d$y <- d$y / max(d$y)  
+        d  
+      })
+    
+    # Constraining Values to Fall within the Observed Minimum and Maximum
+      prior_max_x <- max(unlist(lapply(prior_density_list, function(d) max(d$x))))
+      posterior_max_x <- max(unlist(lapply(posterior_density_list, function(d) max(d$x))))
+      max_x <- max(c(prior_max_x,  posterior_max_x))
+      
+      prior_min_x <- min(unlist(lapply(prior_density_list, function(d) min(d$x))))
+      posterior_min_x <- min(unlist(lapply(posterior_density_list, function(d) min(d$x))))
+      min_x <- min(c(prior_min_x, posterior_min_x))
+    
+    # Plotting the Two Distributions
+      x_axis <- pretty(c(min_x, max_x))
+    
+    # Layout Matrix
+      layout.matrix <- matrix(c(1, 2), nrow = 2, ncol = 1)
+      par(mfrow = c(1, 1)) 
+      layout(mat = layout.matrix, heights = c(2, 0.25))
+    
+    # Creating Base Plot
+      plot(0, type='n', xlab='Values', ylab='Density', xlim=c(min(x_axis), max(x_axis)), ylim=c(0,1) ,cex.axis=1, 
+           las=1, main=' ', tck=0.015, xaxt='n', bty='L')
+      grid(nx = NA, ny = NULL, col = "gray", lty = "dotted")
+      
+      axis(1, padj=0.75, tck=0.015) 
+      dataplot_tick_function(0.015, 0.40)
+    
+    # Plotting Densities
+      for (i in seq_along(prior_density_list)){
+        lines(prior_density_list[[i]], col=rgb(119/255,136/255,153/255))
+      }
+      
+      for (i in seq_along(posterior_density_list)){
+        lines(posterior_density_list[[i]], col="brown")
+      }
+      
+    # Adding Title
+      title("Model Checks", family='serif', cex.main=1.5, line=0.2)
+    
+    # Adding Legend
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+      
+    # Adding Line & Annotations
+      y_pos <- 0.5
+      x1_start <- 0.1
+      x1_end <- 0.15
+      segments(x1_start, y_pos, x1_end, y_pos, col = rgb(119/255,136/255,153/255))
+      text(x1_end + 0.005, y_pos, 'Prior Predictive Dist.', pos=4)
+      
+      x1_start <- 0.6
+      x1_end <- 0.65
+      segments(x1_start, y_pos, x1_end, y_pos, col = 'brown')
+      text(x1_end + 0.005, y_pos, 'Post. Predictive Dist.', pos=4)
+    
+    # Recording Plot
+      shrinkage_plot <- recordPlot()
+    
+    # Return Plot
+      return(shrinkage_plot)
+    
+    # Return to Normal Layout
+      par(mfrow = c(1, 1))
+  }
+
+# Fit Plot Density Function
+  fit_check_density <- function(predictions, x_label, observed_values, plot_title, iterations=1000){
+    # Layout Matrix
+      layout.matrix <- matrix(c(1, 2), nrow = 2, ncol = 1)
+      par(mfrow = c(1, 1)) 
+      layout(mat = layout.matrix, heights = c(2, 0.25))
+    
+   #  Generating the Sample Densities
+      posterior_density_list <- vector('list', iterations)
+      for (i in seq_along(posterior_density_list)){
+        posterior_density_list[[i]] <-  density(apply(predictions, 2, function(col) sample(col, 1)))
+      }
+    
+    # Standardizing the y-axis for Comparison
+      posterior_density_list <- lapply(posterior_density_list, function(d) {
+        d$y <- d$y / max(d$y)  
+        d  
+      })
+    
+    # Creating Joint Axis
+      posterior_max_x <- max(unlist(lapply(posterior_density_list, function(d) max(d$x))))
+      posterior_min_x <- max(unlist(lapply(posterior_density_list, function(d) min(d$x))))
+      x_axis <- pretty(c(posterior_min_x, posterior_max_x))
+    
+    # Create Empty Plot
+      plot(NA, xlim = range(x_axis), ylim = c(0,1.05), 
+           xlab='', ylab=' ', las=1, main=' ', tck=0.025, 
+           bty='L', cex.axis=1.1, xaxt='n')
+      
+      grid(lwd = 2)
+      axis(1, padj=0.75, tck=0.015) 
+      dataplot_tick_function(0.015, 0.40)
+    
+    # Adding Axis Labels
+      mtext(side = 1, text=x_label, line = 3.5, cex = 1.3)
+      mtext(side = 2, text='Density', 2.5, cex = 1.3)
+    
+    # Plotting Predictive Posterior Distribution
+      for (i in seq_along(posterior_density_list)){
+        lines(posterior_density_list[[i]], col=rgb(187/255, 187/255, 187/255))
+      }
+    
+    # Plotting Observations 
+      observed_density <- density(observed_values)
+      x <- observed_density$x
+      y <- observed_density$y
+      y <- y/max(y)
+      lines(x, y, col="blue")  
+    
+    # Adding Title
+      title(plot_title, family='serif', cex.main=1.5, line=1.25)
+    
+    # Adding Legend
+      par(mar = c(0, 0, 0, 0))
+      plot.new()
+    
+    # Adding Line & Annotations
+      y_pos <- 0.5
+      x1_start <- 0.10
+      x1_end <- 0.15
+      segments(x1_start, y_pos, x1_end, y_pos, col = 'blue')
+      text(x1_end + 0.005, y_pos, 'Observed', pos=4)
+    
+      x1_start <- 0.7
+      x1_end <- 0.75
+      segments(x1_start, y_pos, x1_end, y_pos, col = rgb(187/255, 187/255, 187/255))
+      text(x1_end + 0.005, y_pos, 'Predictions', pos=4)
+    
+    # Recording Plot
+      fit_density <- recordPlot()
+    
+    # Return Plot
+      return(fit_density)
+    
+    # Return to Normal Layout
+      par(mfrow = c(1, 1))
+  }
   
