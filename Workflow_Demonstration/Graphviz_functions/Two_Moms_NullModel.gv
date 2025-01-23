@@ -1,0 +1,18 @@
+// Null Model Causal Diagram
+// Jonathan H. Morgan, Ph.D.
+// 22 January 2025
+
+digraph NullModel {
+    rankdir=TB;
+    ranksep=0.5;
+    nodesep=1;
+
+    // Define nodes
+    D [label="D", shape=circle, width=0.7];
+
+    // Define annotation text
+    D_annot [label=<<i>D &#126; f<sub>D</sub>(Intercept, Error Variance)</i>>, shape=plaintext];
+
+    // Position annotation at the bottom
+    D -> D_annot [style=invisible, arrowhead=none];
+}
