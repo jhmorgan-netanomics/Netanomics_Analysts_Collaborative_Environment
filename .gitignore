@@ -6,4 +6,4 @@ __pycache__/
 .DS_Store
 dropbox_keys.json
 google_credentials.json
-google_credentials.json
+Workflow_Demonstration/python_env/

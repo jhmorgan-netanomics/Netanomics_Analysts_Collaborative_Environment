@@ -1,0 +1,37 @@
+// Two Moms Causal Diagram
+// Jonathan H. Morgan, Ph.D.
+// 22 January 2025
+
+digraph CausalDiagram {
+    rankdir=TB;
+    ranksep=0.5;
+    nodesep=0.5;
+
+    // Define nodes
+    {rank=same; B1; M; D; B2}
+    B1 [label=<B<sub>1</sub>>, shape=circle, width=0.7];
+    M [label="M", shape=circle, width=0.7];
+    D [label="D", shape=circle, width=0.7];
+    B2 [label=<B<sub>2</sub>>, shape=circle, width=0.7];
+    U [label="u", shape=ellipse, style=dashed];
+
+    // Define edges with italicized labels
+    B1 -> M [label=<<i>b</i>>];
+    M -> D [label=<<i>m</i>>];
+    D -> B2 [label=<<i>b</i>>];
+    U -> M [arrowhead=none, style=dashed];
+    U -> D [arrowhead=none, style=dashed];
+
+    // Define annotation text
+    M_annot [label=<<i>M &#126; f<sub>M</sub>(B<sub>1</sub>, u)</i>>, shape=plaintext];
+    D_annot [label=<<i>D &#126; f<sub>D</sub>(M, B<sub>2</sub>, u)</i>>, shape=plaintext];
+    B_annot [label=<<i>B<sub>1</sub>, B<sub>2</sub> &#126; f<sub>B</sub>(.)</i>>, shape=plaintext];
+    U_annot [label=<<i>u &#126; f<sub>u</sub>(.)</i>>, shape=plaintext];
+
+    // Position annotations at the bottom
+    M -> M_annot [style=invisible, arrowhead=none];
+    D -> M_annot [style=invisible, arrowhead=none];
+    M_annot -> D_annot [style=invisible, arrowhead=none];
+    D_annot -> B_annot [style=invisible, arrowhead=none];
+    B_annot -> U_annot [style=invisible, arrowhead=none];
+}

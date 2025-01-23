@@ -1,0 +1,48 @@
+. Two Moms: 4Plot
+. Jonathan H. Morgan, Ph.D.
+. 22 January 2025
+
+.   Setting Directory
+    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+.   dataplot
+.   PWD
+
+. -------------------- .
+.    IMPORTING DATA    .
+. -------------------- .
+
+CALL read_two_moms.DP
+
+. -------------------- .
+.    CREATING 4PLOT    .
+. -------------------- .
+
+COMMENT Output Device Settings: Score Comparison
+    DEVICE 2 CLOSE
+    LET STRING fplot = Two_Moms_4Plot.ps
+    LET STRING outplot = Two_Moms_4Plot.png
+    SET ipl1na ^fplot
+    SET POSTSCRIPT COLOR DEFAULT ON
+    SET POSTSCRIPT FONT PALATINO
+    DEVICE 2 POSTSCRIPT
+
+COMMENT Plot Settings
+    X2FRAME OFF; Y2FRAME OFF; X1FRAME ON; Y1FRAME ON
+    FRAME THICKNESS = 0.1 
+    FRAME CORNER COORDINATES 20 15 90 90
+    YGRID ON; XGRID OFF
+    GRID COLOR g50
+    TIC OFFSET UNITS SCREEN
+    TIC POSITION THROUGH
+    label case asis
+    title case asis
+    TITLE SIZE 3
+    TITLE AUTOMATIC
+
+COMMENT Plotting
+    4-PLOT D
+
+COMMENT Writing to File
+    DEVICE 2 CLOSE 
+    SYSTEM gs -dBATCH -dNOPAUSE -sDEVICE=png16m -r300 -sOutputFile=^outplot ^fplot 
+    
