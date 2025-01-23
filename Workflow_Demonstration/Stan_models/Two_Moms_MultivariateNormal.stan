@@ -15,7 +15,7 @@ data {
 parameters {
     real a1;                          // Intercept for Mom model
     real a2;                          // Intercept for Daughter model
-    real b;                           // Effect of B1 and B2
+    real b;                           // Effect of Birth Order, B1 and B2
     real m;                           // Effect of M on D
     real<lower=0> sigma_M;            // Standard deviation for Mom model
     real<lower=0> sigma_D;            // Standard deviation for Daughter model

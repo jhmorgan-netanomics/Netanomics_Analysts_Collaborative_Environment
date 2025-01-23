@@ -1,1 +1,7 @@
-{}
+{   
+    "terminal.integrated.fontFamily": "monospace",
+    "julia.additionalArgs": [
+        "--banner=yes"
+    ],
+    "r.lsp.diagnostics": false
+}

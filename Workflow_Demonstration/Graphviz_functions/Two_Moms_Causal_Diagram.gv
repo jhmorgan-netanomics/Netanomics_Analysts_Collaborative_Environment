@@ -5,10 +5,11 @@
 digraph CausalDiagram {
     rankdir=TB;
     ranksep=0.5;
-    nodesep=0.5;
+    nodesep=1;
 
     // Define nodes
-    {rank=same; B1; M; D; B2}
+    {rank=same; B1; B2; U}
+    {rank=same; M; D}
     B1 [label=<B<sub>1</sub>>, shape=circle, width=0.7];
     M [label="M", shape=circle, width=0.7];
     D [label="D", shape=circle, width=0.7];
@@ -17,10 +18,10 @@ digraph CausalDiagram {
 
     // Define edges with italicized labels
     B1 -> M [label=<<i>b</i>>];
-    M -> D [label=<<i>m</i>>];
-    D -> B2 [label=<<i>b</i>>];
-    U -> M [arrowhead=none, style=dashed];
-    U -> D [arrowhead=none, style=dashed];
+    M -> D [label=<<i>m</i>>, color=blue];
+    B2 -> D [label=<<i>b</i>>];
+    U -> M [style=dashed];
+    U -> D [style=dashed];
 
     // Define annotation text
     M_annot [label=<<i>M &#126; f<sub>M</sub>(B<sub>1</sub>, u)</i>>, shape=plaintext];
