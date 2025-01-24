@@ -153,7 +153,7 @@ RUN apt-get update && \
 RUN R -e "install.packages(c('tidyverse', 'dplyr', 'lme4', 'cowplot', 'igraph', 'stringr', 'purrr', 'tidyr', 'httr', 'jsonlite', \
                              'HLMdiag', 'predictmeans', 'bayesplot', 'posterior', 'loo', 'BMS', 'tikzDevice', 'knitr', 'rstan', 'parallel', 'readxl', 'datetimeutils', \
                              'sysfonts', 'extrafont', 'showtext', 'readr', 'psch', 'forecast', 'plotrix', 'RColorBrewer', 'circlize', 'languageserver', \
-                             'network', 'sna', 'ergm', 'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet'), \
+                             'network', 'sna', 'ergm', 'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet', 'bridgesampling'), \
                              repos='https://cloud.r-project.org')"
 
 # Install devtools and its dependencies

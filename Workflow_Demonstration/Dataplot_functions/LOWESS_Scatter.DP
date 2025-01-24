@@ -1,0 +1,119 @@
+. Two Moms: LOWESS Scatter Plot
+. Jonathan H. Morgan, Ph.D.
+. 24 January 2025
+
+.   Setting Directory
+    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+.   dataplot
+.   PWD
+
+. -------------------- .
+.    IMPORTING DATA    .
+. -------------------- .
+
+RESET
+
+CALL read_two_moms.DP
+
+. ------------------------------------------------------------------- .
+.    TRANSFORMING BIRTH ORDER VARIABLES FOR VISUALIZATION PURPOSES    .
+. ------------------------------------------------------------------- .
+
+LET b_1 = B1 + 1
+LET b_2 = B2 + 1
+
+. ----------------------------------- .
+.    CREATING LOWESS SCATTER PLOTS    .
+. ----------------------------------- .
+
+COMMENT Output Device Settings: Score Comparison
+    DEVICE 2 CLOSE
+    LET STRING fplot = Two_Moms_LOWESS_Scatter.ps
+    LET STRING outplot = Two_Moms_LOWESS_Scatter.png
+    SET ipl1na ^fplot
+    SET POSTSCRIPT COLOR DEFAULT ON
+    SET POSTSCRIPT FONT PALATINO
+    DEVICE 2 POSTSCRIPT
+
+COMMENT Plot Settings
+    X2FRAME OFF; Y2FRAME OFF; X1FRAME ON; Y1FRAME ON
+    FRAME THICKNESS = 0.1 
+    FRAME CORNER COORDINATES 20 15 90 90
+    YGRID ON; XGRID OFF
+    GRID COLOR g50
+    TIC OFFSET UNITS SCREEN
+    TIC POSITION THROUGH
+    label case asis
+    title case asis
+    TITLE SIZE 3
+    X1LABEL COORDINATES 55 7
+    X1LABEL Mothers' Family Size  
+    X1LABEL SIZE 3
+    y1LABEL COORDINATES 15 50
+    Y1LABEL Daughters' Family Size
+    Y1LABEL SIZE 3
+    TITLE OFFSET 2
+    TITLE SIZE 4
+    CHARACTER SIZE 1.5 1.5
+    LOWESS FRACTION 0.3
+
+
+COMMENT Plotting
+    MULTIPLOT 2 1
+        .   First Born Mothers
+            LOWESS SMOOTH d m
+            CHAR CIRCLE CIRCLE 
+            CHARACTER COLOR blue brown 
+            LINE COLOR black
+            LINES BLANK BLANK BLANK SOLID
+            TITLE First Born Mothers 
+            Y1LIMITS -5 7
+            PLOT d m b_1 AND
+            PLOT d PRED vs m
+
+            LINE COLOR brown
+            CIRCLE COLOR brown
+            REGION FILL ON
+            REGION FILL COLOR brown
+            CIRCLE 25 85 26 86
+            MOVE 27 85; HEIGHT 2.5; TEXT First Born Mothers
+
+            LINE COLOR blue
+            CIRCLE COLOR blue
+            REGION FILL ON
+            REGION FILL COLOR blue
+            CIRCLE 25 81 26 82
+            MOVE 27 81; HEIGHT 2.5; TEXT Other Birth Orders
+            LINES BLANK ALL
+            REGION FILL OFF
+
+        .   First Born Daughters  
+            CHAR CIRCLE CIRCLE 
+            CHARACTER COLOR blue brown 
+            LINE COLOR black
+            LINES BLANK BLANK BLANK SOLID
+            TITLE First Born Daughters
+            Y1LIMITS -5 7
+            PLOT d m b_2 AND
+            PLOT d PRED vs m
+
+            LINE COLOR brown
+            CIRCLE COLOR brown
+            REGION FILL ON
+            REGION FILL COLOR brown
+            CIRCLE 25 85 26 86
+            MOVE 27 85; HEIGHT 2.5; TEXT First Born Daughters
+
+            LINE COLOR blue
+            CIRCLE COLOR blue
+            REGION FILL ON
+            REGION FILL COLOR blue
+            CIRCLE 25 81 26 82
+            MOVE 27 81; HEIGHT 2.5; TEXT Other Birth Orders
+            LINES BLANK ALL
+            REGION FILL OFF
+    END OF MULTIPLOT
+
+COMMENT Writing to File
+    DEVICE 2 CLOSE 
+    SYSTEM gs -dBATCH -dNOPAUSE -sDEVICE=png16m -r300 -sOutputFile=^outplot ^fplot 

@@ -19,7 +19,7 @@ digraph CausalDiagram {
     // Define edges with italicized labels
     B1 -> M [label=<<i>b</i>>];
     M -> D [label=<<i>m</i>>, color=blue];
-    B2 -> D [label=<<i>b</i>>];
+    B2 -> D [label=<<i>b</i>>, color=blue];
     U -> M [style=dashed];
     U -> D [style=dashed];
 
