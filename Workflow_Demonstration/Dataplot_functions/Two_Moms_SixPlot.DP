@@ -1,0 +1,102 @@
+. Two Moms: Six-Plot
+. Jonathan H. Morgan, Ph.D.
+. 24 January 2025
+
+.   Setting Directory
+    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+.   dataplot
+.   PWD
+
+. -------------------- .
+.    IMPORTING DATA    .
+. -------------------- .
+
+RESET
+
+CALL read_two_moms_map.DP
+
+. -------------------- .
+.    CREATING 6PLOT    .
+. -------------------- .
+
+COMMENT Output Device Settings: Score Comparison
+    DEVICE 2 CLOSE
+    LET STRING fplot = Two_Moms_6Plot.ps
+    LET STRING outplot = Two_Moms_6Plot.png
+    SET ipl1na ^fplot
+    SET POSTSCRIPT COLOR DEFAULT ON
+    SET POSTSCRIPT FONT PALATINO
+    DEVICE 2 POSTSCRIPT
+
+COMMENT Plot Settings
+    X2FRAME OFF; Y2FRAME OFF; X1FRAME ON; Y1FRAME ON
+    FRAME THICKNESS = 0.1 
+    FRAME CORNER COORDINATES 20 15 90 90
+    YGRID ON; XGRID OFF
+    GRID COLOR g50
+    TIC OFFSET UNITS SCREEN
+    TIC POSITION THROUGH
+    label case asis
+    title case asis
+    TITLE SIZE 5
+    X1LABEL SIZE 4
+    Y1LABEL SIZE 4
+    TIC LABEL SIZE 3
+
+COMMENT Plotting
+    MULTIPLOT CORNER COORDINATES 5 10 95 95
+    MULTIPLOT 3 2
+        .   Response and Predicted Values
+            LINE SOLID
+            CHARACTER x 
+            LINE COLOR black
+            CHARACTER COLOR blue 
+            Y1LIMITS -5 7
+            Y1LABEL MAP Mean
+            X1LABEL Daughters' Family Size
+            TITLE MAP Esimate vs. Observed
+            PLOT map_est vs d
+
+        .   Residual vs. Observed
+            LINE BLANK ALL
+            CHARACTER x 
+            LINE COLOR black
+            CHARACTER COLOR blue 
+            Y1LIMITS 
+            Y1LABEL COORDINATES 10 50
+            Y1LABEL Residual
+            X1LABEL Daughters' Family Size
+            TITLE Residual vs. Observed
+            PLOT resid vs d
+
+        .   Residual vs. Prediction
+            Y1LIMITS 
+            Y1LABEL COORDINATES 10 50
+            Y1LABEL Residual
+            X1LABEL MAP Mean
+            TITLE Residual vs. MAP Estimate
+            PLOT resid vs map_est
+
+        .   Lag Plot of Residuals
+            TITLE Lag Plot of Residuals
+            X1LABEL Residual (i+1)
+            LAG PLOT resid
+
+        .   Histogram of Residuals
+            TITLE Histogram of Residuals
+            Y1LABEL 
+            X1LABEL Residuals
+            HISTOGRAM resid
+
+        .   Normal Plot of Residuals
+            TITLE Normal Probability Plot
+            Y1LABEL 
+            X1LABEL Residuals
+            NORMAL PROBABILITY PLOT resid
+    END OF MULTIPLOT
+
+COMMENT Writing to File
+    DEVICE 2 CLOSE 
+    SYSTEM gs -dBATCH -dNOPAUSE -sDEVICE=png16m -r300 -sOutputFile=^outplot ^fplot 
+
+    

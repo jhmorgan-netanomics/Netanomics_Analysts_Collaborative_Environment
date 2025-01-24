@@ -1,0 +1,77 @@
+. Two Moms: QQ Plot
+. Jonathan H. Morgan, Ph.D.
+. 24 January 2025
+
+.   Setting Directory
+    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+.   dataplot
+.   PWD
+
+. -------------------- .
+.    IMPORTING DATA    .
+. -------------------- .
+
+RESET
+
+CALL read_two_moms_map.DP
+
+. --------------------------------- .
+.    CREATING PLOTTING VARIABLES    .
+. --------------------------------- .
+
+.   Creating Reference Distribution (Normal)
+    LET r_size = SIZE resid
+    LET Y1 = NORMAL RANDOM NUMBERS FOR I = 1 1 r_size 
+    LET X = SEQUENCE .005 .005 .995 
+    LET Y2 = NORPPF(X)
+    LET Y_ref = COMBINE -2.8253000000000004 Y2 
+
+. ---------------------- .
+.    CREATING QQ PLOT    .
+. ---------------------- .
+
+COMMENT Output Device Settings: Score Comparison
+    DEVICE 2 CLOSE
+    LET STRING fplot = Two_Moms_QQPlot.ps
+    LET STRING outplot = Two_Moms_QQPlot.png
+    SET ipl1na ^fplot
+    SET POSTSCRIPT COLOR DEFAULT ON
+    SET POSTSCRIPT FONT PALATINO
+    DEVICE 2 POSTSCRIPT
+
+COMMENT Plot Settings
+    X2FRAME OFF; Y2FRAME OFF; X1FRAME ON; Y1FRAME ON
+    FRAME THICKNESS = 0.1 
+    FRAME CORNER COORDINATES 20 15 90 90
+    YGRID ON; XGRID OFF
+    GRID COLOR g50
+    TIC OFFSET UNITS SCREEN
+    TIC POSITION THROUGH
+    label case asis
+    title case asis
+    TITLE SIZE 5
+    X1LABEL SIZE 4
+    Y1LABEL SIZE 4
+    TIC LABEL SIZE 3
+
+COMMENT Plot Settings
+    LINE BLANK SOLID DASHED
+    CHARACTER CIRCLE BLANK BLANK
+    CHARACTER FILL ON OFF OFF
+    CHARACTER HW 0.5 0.375
+    TITLE AUTOMATIC
+    TITLE OFFSET 2
+    LABEL CASE ASIS
+    Y1LABEL Residual Daughters' Family Size
+    X1LABEL Unit Normal Quantile
+    QUANTILE-QUANTILE PLOT resid y_ref
+.
+LET PPA0 = ROUND(PPA0,3)
+LET PPA1 = ROUND(PPA1,3)
+LET PPCC = ROUND(PPCC,3)
+JUSTIFICATION LEFT
+MOVE 20 87; TEXT A0: ^PPA0
+MOVE 20 85; TEXT A1: ^PPA1
+MOVE 20 83; TEXT PPCC: ^PPCC
+
+. COME BACK HERE!!

@@ -167,49 +167,38 @@
   }
   
   format_floats_to_string <- function(variable, var_name, col_type) {
-    # Ensure variable is treated as numeric
-    if (!is.numeric(variable)) {
-      stop("Input variable must be numeric.")
-    }
-    
-    # Determine the precision (number of decimal places)
-    precision <- if (col_type == "numeric") 14 else 16
+    # Determine precision and width
+      precision <- if (col_type == "numeric") 14 else 16
     
     # Format numeric values to strings with the specified precision
-    formatted_str <- sprintf(paste0("%.", precision, "f"), variable)
+      formatted_str <- sprintf(paste0("%.", precision, "f"), variable)
     
-    # Trim trailing zeros and ensure ".0" for integer-like values
-    formatted_str <- gsub("0+$", "", formatted_str)   # Remove trailing zeros
-    formatted_str <- gsub("\\.$", ".0", formatted_str) # Ensure numbers like "2." become "2.0"
+    # Split into whole and decimal parts
+      parts <- strsplit(formatted_str, "\\.", fixed = FALSE)
+      whole_parts <- sapply(parts, `[`, 1) # Extract whole number part
+      decimal_parts <- sapply(parts, `[`, 2, USE.NAMES = FALSE) # Extract decimal part
+      
+    # Determine maximum width for padding
+      max_whole_width <- max(nchar(whole_parts))
+      max_decimal_places <- precision # Fixed based on the desired precision
     
-    # Calculate the width for padding (whole and decimal parts)
-    parts <- strsplit(formatted_str, "\\.", fixed = FALSE)
-    whole_parts <- sapply(parts, `[`, 1) # Extract whole number part
-    decimal_parts <- sapply(parts, `[`, 2, USE.NAMES = FALSE) # Extract decimal part
+    # Pad whole parts with leading zeros
+      padded_whole_parts <- sprintf(paste0("%0", max_whole_width, "d"), as.numeric(whole_parts))
     
-    max_whole_width <- max(nchar(whole_parts)) # Maximum width of the whole part
-    max_decimal_places <- max(nchar(decimal_parts, keepNA = TRUE), na.rm = TRUE) # Maximum decimal places
-    
-    # Pad whole parts and decimal parts to ensure uniformity
-    padded_whole_parts <- sprintf(paste0("%", max_whole_width, "s"), whole_parts)
-    padded_decimal_parts <- sapply(decimal_parts, function(dp) {
-      if (is.na(dp)) {
-        ""
-      } else {
-        sprintf(paste0("%-", max_decimal_places, "s"), dp)
-      }
-    })
+    # Pad decimal parts with trailing zeros
+      padded_decimal_parts <- sprintf(paste0("%-", max_decimal_places, "s"), decimal_parts)
+      padded_decimal_parts <- gsub(" ", "0", padded_decimal_parts) # Replace spaces with zeros
     
     # Combine whole and decimal parts into a single string
-    padded_floats <- paste0(padded_whole_parts, ".", padded_decimal_parts)
+      padded_floats <- paste0(padded_whole_parts, ".", padded_decimal_parts)
     
     # Prepare Dataplot commands
-    total_width <- max_whole_width + 1 + max_decimal_places  # +1 for the decimal point
-    set_command <- sprintf("SET READ FORMAT 1F%d.%d", total_width, max_decimal_places)
-    read_command <- sprintf("READ %s", var_name)
-    
+      total_width <- max_whole_width + 1 + max_decimal_places # +1 for the decimal point
+      set_command <- sprintf("SET READ FORMAT 1F%d.%d", total_width, max_decimal_places)
+      read_command <- sprintf("READ %s", var_name)
+      
     # Return a plain character vector
-    return(c(set_command, read_command, padded_floats))
+      return(c(set_command, read_command, padded_floats))
   }
   
 # Highest Density Posterior Interval (HDPI) function in R
