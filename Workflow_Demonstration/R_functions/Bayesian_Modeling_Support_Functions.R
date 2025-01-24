@@ -5,6 +5,213 @@
 # Helper Functions
   `%notin%` <- Negate(`%in%`)
   
+# Dataplot Export Function & Supporting Functions
+  dataplot_export <- function(data_frame, data_name) {
+    # Add Row ID
+      if (!("Obs_ID" %in% colnames(data_frame))) {
+        data_frame <- cbind(Obs_ID = 1:nrow(data_frame), data_frame)
+      }
+    
+    # Identify variable types & sort into blocks
+      types_list <- sapply(data_frame, class)
+    
+    # Create sequential IDs for string variables
+      string_variables <- colnames(data_frame)[grepl("character", types_list)]
+      for (var_name in string_variables) {
+        data_frame <- string_to_integer(data_frame, var_name)
+      }
+      
+    # Transform boolean variables to integers
+      bool_vars <- colnames(data_frame)[types_list == "logical"]
+      if (length(bool_vars) > 0) {
+        data_frame[bool_vars] <- lapply(data_frame[bool_vars], as.integer)
+      }
+    
+    # Create index and remove string variables
+      types_list <- sapply(data_frame, class)
+      col_ids <- seq_along(types_list)
+      non_string_cols <- !grepl("character", types_list)
+      col_ids <- col_ids[non_string_cols]
+      var_names <- colnames(data_frame)[non_string_cols]
+    
+    # Create export names
+      export_names <- gsub(" ", "_", var_names)
+      export_names <- mapply(function(name, i) {
+        if (nchar(name) > 8) {
+          paste0("c_", i)
+        } else {
+          name
+        }
+      }, var_names, seq_along(var_names))
+      
+    # Construct types index
+      types_index <- data.frame(
+        col_id = col_ids,
+        name = var_names,
+        export_name = export_names,
+        type = sapply(data_frame[, non_string_cols, drop = FALSE], class)
+      )
+    
+    # Isolate string variable key for export
+      if (length(string_variables) > 0) {
+        string_key <- data_frame[, c(string_variables, paste0(string_variables, "_id")), drop = FALSE]
+      } else {
+        # If no string variables exist, create an empty data.frame
+        string_key <- data.frame()
+      }
+    
+    # Sort types index
+      sort_key <- ifelse(tolower(types_index$name) == "obs_id", -1, 
+                       as.integer(grepl("id", tolower(types_index$name))))
+      types_index <- types_index[order(sort_key, types_index$name, decreasing = FALSE), ]
+    
+    # Create print elements
+      end_command <- "END OF DATA"
+      space_element <- "\n"
+    
+    # Create label commands
+      data_labels <- mapply(function(name, export_name) {
+        paste("VARIABLE LABEL", name, export_name)
+      }, types_index$name, types_index$export_name)
+      
+    # Specify Dataplot IO settings
+      n_rows <- nrow(data_frame)
+      n_cols <- ncol(data_frame)
+      io_commands <- if (n_cols > 10) {
+        c(
+          if (n_rows < 1000) "DIMENSION 1000 ROWS" else paste("DIMENSION", n_rows, "ROWS"),
+          "MAXIMUM RECORD LENGTH  9999",
+          "SET DATA MISSING VALUE missing",
+          "SET READ MISSING VALUE 999"
+        )
+      } else {
+        c(
+          "MAXIMUM RECORD LENGTH  9999",
+          "SET DATA MISSING VALUE missing",
+          "SET READ MISSING VALUE 999"
+        )
+      }
+    
+    # Build output content as a character vector
+      io_elements <- c(io_commands, space_element)
+    
+    # Initialize output list for data vectors
+      output_list <- list()
+      for (i in seq_len(nrow(types_index))) {
+        # Extracting Types Data
+          index_value <- types_index$col_id[i]
+          index_name <- types_index$export_name[i]
+          data_type <- types_index$type[i]
+        
+        # Construct data_vector based on type
+          data_vector <- if (data_type == "integer") {
+            # Format integers
+            format_integers_to_string(data_frame[[index_value]], index_name)
+          } else if (data_type == "numeric") {
+            # Format floating-point numbers
+            format_floats_to_string(data_frame[[index_value]], index_name, data_type)
+          } else {
+            stop(sprintf("Unsupported data type: %s", data_type))
+          }
+        
+        # Store each column's data_vector in the output_list
+          output_list[[i]] <- c(data_vector, end_command, space_element)
+      }
+      output_data <- unlist(output_list)
+    
+    # Add data labels
+      output <- c(io_elements, output_data, data_labels)
+    
+    # Write the output to a file
+      outfile <- paste0("read_", data_name, ".DP")
+      file_conn <- file(outfile, "w")
+      writeLines(output, file_conn)
+      close(file_conn)
+    
+    # Return string variable key
+      return(string_key)
+  }
+  
+  string_to_integer <- function(data_frame, var_name) {
+    column_data <- data_frame[[var_name]]
+    unique_values <- unique(column_data[!is.na(column_data)])
+    value_to_id <- setNames(seq_along(unique_values), unique_values)
+    id_column <- ifelse(is.na(column_data), 0, value_to_id[column_data])
+    data_frame[[paste0(var_name, "_id")]] <- id_column
+    return(data_frame)
+  }
+  
+  format_integers_to_string <- function(variable, var_name) {
+    # Convert integers to strings without scientific notation
+      s_variable <- sprintf("%d", variable)
+    
+    # Determine the maximum width for padding
+      width <- max(nchar(s_variable))
+    
+    # Pad strings to uniform length
+      padded_s_variable <- sapply(s_variable, function(x) {
+        padding_needed <- width - nchar(x)
+        if (padding_needed > 0) {
+          paste0(strrep("0", padding_needed), x)
+        } else {
+          x
+        }
+      })
+    
+    # Prepare Dataplot commands
+      set_command <- sprintf("SET READ FORMAT 1F%d.0", width)
+      read_command <- sprintf("READ %s", var_name)
+    
+    # Return a plain character vector
+      return(c(set_command, read_command, padded_s_variable))
+  }
+  
+  format_floats_to_string <- function(variable, var_name, col_type) {
+    # Ensure variable is treated as numeric
+    if (!is.numeric(variable)) {
+      stop("Input variable must be numeric.")
+    }
+    
+    # Determine the precision (number of decimal places)
+    precision <- if (col_type == "numeric") 14 else 16
+    
+    # Format numeric values to strings with the specified precision
+    formatted_str <- sprintf(paste0("%.", precision, "f"), variable)
+    
+    # Trim trailing zeros and ensure ".0" for integer-like values
+    formatted_str <- gsub("0+$", "", formatted_str)   # Remove trailing zeros
+    formatted_str <- gsub("\\.$", ".0", formatted_str) # Ensure numbers like "2." become "2.0"
+    
+    # Calculate the width for padding (whole and decimal parts)
+    parts <- strsplit(formatted_str, "\\.", fixed = FALSE)
+    whole_parts <- sapply(parts, `[`, 1) # Extract whole number part
+    decimal_parts <- sapply(parts, `[`, 2, USE.NAMES = FALSE) # Extract decimal part
+    
+    max_whole_width <- max(nchar(whole_parts)) # Maximum width of the whole part
+    max_decimal_places <- max(nchar(decimal_parts, keepNA = TRUE), na.rm = TRUE) # Maximum decimal places
+    
+    # Pad whole parts and decimal parts to ensure uniformity
+    padded_whole_parts <- sprintf(paste0("%", max_whole_width, "s"), whole_parts)
+    padded_decimal_parts <- sapply(decimal_parts, function(dp) {
+      if (is.na(dp)) {
+        ""
+      } else {
+        sprintf(paste0("%-", max_decimal_places, "s"), dp)
+      }
+    })
+    
+    # Combine whole and decimal parts into a single string
+    padded_floats <- paste0(padded_whole_parts, ".", padded_decimal_parts)
+    
+    # Prepare Dataplot commands
+    total_width <- max_whole_width + 1 + max_decimal_places  # +1 for the decimal point
+    set_command <- sprintf("SET READ FORMAT 1F%d.%d", total_width, max_decimal_places)
+    read_command <- sprintf("READ %s", var_name)
+    
+    # Return a plain character vector
+    return(c(set_command, read_command, padded_floats))
+  }
+  
 # Highest Density Posterior Interval (HDPI) function in R
   HPDI <- function(x, alpha = 0.11) {
     n <- length(x)

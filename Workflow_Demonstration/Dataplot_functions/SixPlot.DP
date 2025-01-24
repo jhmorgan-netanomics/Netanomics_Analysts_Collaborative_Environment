@@ -1,0 +1,16 @@
+. Two Moms: Six-Plot
+. Jonathan H. Morgan, Ph.D.
+. 24 January 2025
+
+.   Setting Directory
+    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+.   dataplot
+.   PWD
+
+. -------------------- .
+.    IMPORTING DATA    .
+. -------------------- .
+
+RESET
+
+CALL read_two_moms_map.DP
