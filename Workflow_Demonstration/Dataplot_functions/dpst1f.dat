@@ -1,9 +1,12 @@
-    8
+   11
 OBS_ID       1       200
 B2           2       200
 D            3       200
 M            4       200
 MAP_EST      5       200
 RESID        6       200
-X_REF        7       200
-Y_REF        8       200
+DB_ORDER     7       200
+RES_1        8        86
+RES_2        9       114
+RES_1_X     10       256
+RES_1_Y     11       256
