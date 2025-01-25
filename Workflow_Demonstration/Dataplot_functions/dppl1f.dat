@@ -113,111 +113,143 @@ gsave    % SAVE INITIAL GRAPHICS STATE
     0  4929 l
     0     0 l
 closepath fill 0. 0. 0. setrgbcolor
-%!PS-Adobe-2.0
-%%Creator: Dataplot
-%%Title: Dataplot Postscript File
-%%CreationDate: NULL
-%%Pages: (atend)
-%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic
-%%+ Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique Courier
-%%+ Courier-Bold Courier-Oblique  Courier-BoldOblique
-%%+ AvantGarde-Book AvantGarde-BookOblique AvantGarde-Demi AvantGarde-DemiOblique
-%%+ Bookman-Demi Bookman-DemiItalic       Bookman-Light Bookman-LightItalic      
-%%+ Helvetica-Narrow Helvetica-Narrow-Bold Helvetica-Narrow-BoldOblique          
-%%+ Helvetica-Narrow-Oblique              NewCentury-Schlbk-Bold                 
-%%+ NewCentury-Schlbk-Italic              NewCenturySchlbk-BoldItalic            
-%%+ Palatino-Roman Palatino-Bold          Palatino-Italic Palatino-BoldItalic    
-%%+ ZapfChancery-MediumItalic  Symbol                                            
-%%BoundingBox: 0 0 792 792
-% DATAPLOT POSTSCRIPT DRIVER, JANUARY, 1990
-% PROLOG SECTION: DATAPLOT DEFINITIONS     
-%DEFINE PROCEDURE "rightshow" TO PRINT RIGHT JUSTIFIED STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% (STRING) rightshow
-/rightshow
-  {dup stringwidth pop
-   IX exch sub
-   IY moveto
-   show} def
-%DEFINE PROCEDURE "centshow" TO PRINT CENTER JUSTIFIED STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% (STRING) centshow
-/centshow
-  {dup stringwidth pop
-   2 div
-   IX exch sub
-   IY moveto
-   show} def
-%DEFINE PROCEDURE "leftshow" TO PRINT LEFT   JUSTIFIED STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% (STRING) leftshow
-/leftshow
-  {IX IY moveto show} def
-%DEFINE PROCEDURE "vrightshow" TO PRINT RIGHT JUSTIFIED VERTICAL STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% newpath IX IY moveto gsave
-% (STRING) vrightshow grestore
-/vrightshow
-  {dup stringwidth pop
-   IY exch sub
-   IX exch moveto
-    90 rotate
-   show} def
-%DEFINE PROCEDURE "vcentshow" TO PRINT CENTER JUSTIFIED VERTICAL STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% newpath IX IY moveto gsave
-% (STRING) vcentshow grestore
-/vcentshow
-  {dup stringwidth pop
-   2 div
-   IY exch sub
-   IX exch moveto
-     90 rotate
-   show} def
-%DEFINE PROCEDURE "vleftshow" TO PRINT LEFT   JUSTIFIED VERTICAL STRING.  CALL BY:
-%  /IX <XCOOR> def /IY <YCOOR> def 
-% newpath IX IY moveto gsave
-% (STRING) vleftshow grestore
-/vleftshow
-  {IX IY moveto 90 rotate show} def 
-%DEFINE PROCEDURE "setpsfont" TO DEFINE THE POSTSCRIPT FONT NAME AND SIZE.  CALL BY:
-%  /PSFONT <FONTNAME> def /PSSIZE <FONTSIZE> def setpsfont
-/setpsfont
-  {PSFONT  findfont  PSSIZE  scalefont  setfont} def
-%DEFINE PROCEDURE "psstringwidthr" TO MOVE THE STARTING POSITION OF A RIGHT JUSTIFIED STRING.
-%CALL BY:
-%  (STRING) psstringwidthr
-/psstringwidthr
-  {dup stringwidth pop 0 exch sub 0 rmoveto} def
-%DEFINE PROCEDURE "psstringwidthc" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIED STRING.
-%CALL BY:
-%  (STRING) psstringwidthc
-/psstringwidthc
-  {dup stringwidth pop 2 div 0 exch sub 0 rmoveto}  def
-%DEFINE PROCEDURE "psstringwidthtv" TO MOVE THE STARTING POSITION OF A TOP JUSTIFIED VERTICA STRING.
-%CALL BY:
-%  (STRING) psstringwidthtv
-/psstringwidthtv
-  {dup stringwidth pop 0 exch sub 0 exch    rmoveto} def
-%DEFINE PROCEDURE "psstringwidthcv" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIEDVERTICAL STRING.
-%CALL BY:
-%  (STRING) psstringwidthcv
-/psstringwidthcv
-  {dup stringwidth pop 2 div 0 exch sub 0 exch rmoveto} def
-%DEFINE PROCEDURE "leftshow2" TO PRINT LEFT  JUSTIFIED STRING AT CURRENT POSITION.  CALL BY: 
-% (STRING) leftshow2
-/leftshow2
-  {show} def
-%DEFINE PROCEDURE "vleftshow2" TO PRINT BOTTOM  JUSTIFIED VERTICAL STRING.  CALL BY:
-% (STRING) vleftshow2
-/vleftshow2
-  {90 rotate show -90 rotate} def
-% DEFINE PROCEDURE "l" AS ABBREVIATION OF lineto    
-/l {lineto} def
-% DEFINE PROCEDURE "m" AS ABBREVIATION OF moveto    
-/m {moveto} def
-/Helvetica-Bold                           findfont  98 scalefont setfont
-gsave    % SAVE INITIAL GRAPHICS STATE   
-%%EndProlog
-%%Page: 1 1
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath  1478  1233 m  1677  1235 l  1791  1235 l  1872  1240 l  1936  1240 l  1990  1242 l  2036  1243 l  2077  1244 l 
+ 2113  1247 l  2147  1253 l  2178  1253 l  2206  1256 l  2233  1258 l  2258  1258 l  2281  1260 l  2304  1261 l 
+ 2325  1263 l  2346  1265 l  2366  1267 l  2384  1267 l  2403  1268 l  2420  1272 l  2437  1278 l  2454  1281 l 
+ 2470  1282 l  2485  1283 l  2500  1285 l  2515  1289 l  2529  1289 l  2543  1295 l  2557  1300 l  2571  1303 l 
+ 2584  1304 l  2597  1304 l  2609  1311 l  2622  1312 l  2634  1312 l  2646  1314 l  2658  1315 l  2669  1317 l 
+ 2681  1318 l  2692  1319 l  2703  1320 l  2714  1322 l  2725  1324 l  2736  1324 l  2746  1324 l  2757  1326 l 
+ 2767  1330 l  2777  1337 l  2787  1338 l  2797  1339 l  2807  1341 l  2817  1344 l  2827  1348 l  2836  1350 l 
+ 2846  1354 l  2855  1365 l  2865  1367 l  2874  1369 l  2883  1371 l  2892  1382 l  2901  1389 l  2910  1398 l 
+ 2919  1407 l  2928  1411 l  2937  1414 l  2946  1414 l  2955  1429 l  2963  1431 l  2972  1435 l  2981  1438 l 
+ 2989  1441 l  2998  1441 l  3006  1441 l  3015  1446 l  3023  1448 l  3032  1449 l  3040  1461 l  3048  1461 l 
+ 3057  1462 l  3065  1469 l  3073  1475 l  3081  1485 l  3090  1495 l  3098  1496 l  3106  1497 l  3114  1498 l 
+ 3122  1500 l  3130  1505 l  3138  1519 l  3146  1520 l  3155  1520 l  3163  1524 l  3171  1526 l  3179  1526 l 
+ 3187  1528 l  3195  1562 l  3203  1585 l  3211  1636 l  3219  1656 l  3227  1715 l  3235  1781 l  3243  1825 l 
+ 3251  1840 l  3259  1848 l  3267  1882 l  3275  1917 l  3284  1922 l  3292  1924 l  3300  1925 l  3308  1946 l 
+ 3316  1959 l  3324  1982 l  3332  2004 l  3340  2068 l  3349  2073 l  3357  2081 l  3365  2115 l  3373  2147 l 
+ 3382  2164 l  3390  2167 l  3398  2191 l  3407  2198 l  3415  2202 l  3424  2221 l  3432  2232 l  3441  2256 l 
+ 3449  2263 l  3458  2271 l  3467  2319 l  3475  2326 l  3484  2327 l  3493  2338 l  3502  2355 l  3511  2371 l 
+ 3520  2390 l  3529  2483 l  3538  2486 l  3547  2505 l  3556  2528 l  3565  2641 l  3575  2720 l  3584  2735 l 
+ 3594  2752 l  3603  2765 l  3613  2782 l  3623  2809 l  3633  2816 l  3643  2835 l  3653  2856 l  3663  2863 l 
+ 3673  2877 l  3684  2890 l  3694  2899 l  3705  2922 l  3716  2931 l  3727  2939 l  3738  3062 l  3749  3074 l 
+ 3761  3122 l  3772  3157 l  3784  3177 l  3796  3188 l  3808  3200 l  3821  3217 l  3833  3267 l  3846  3274 l 
+ 3859  3298 l  3873  3313 l  3887  3383 l  3901  3407 l  3915  3455 l  3930  3468 l  3945  3494 l  3960  3519 l 
+ 3976  3526 l  3993  3538 l  4010  3541 l  4027  3567 l  4046  3604 l  4064  3654 l  4084  3706 l  4105  3718 l 
+ 4126  3752 l  4149  3777 l  4172  3800 l  4197  3860 l  4224  3876 l  4252  3902 l  4283  3902 l  4317  3911 l 
+ 4353  3923 l  4394  3960 l  4440  3996 l  4494  4053 l  4558  4062 l  4639  4112 l  4753  4185 l stroke newpath  4753  4185 m 
+ 4952  4190 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath   965   986 m  5466   986 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath  5466   986 m  5466  4437 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath  5466  4437 m   965  4437 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath   965  4437 m   965   986 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+newpath  1286   887 m  1286   986 l stroke
+newpath  1929   887 m  1929   986 l stroke
+newpath  2572   887 m  2572   986 l stroke
+newpath  3215   887 m  3215   986 l stroke
+newpath  3858   887 m  3858   986 l stroke
+newpath  4501   887 m  4501   986 l stroke
+newpath  5144   887 m  5144   986 l stroke
+newpath   965   937 m   965   986 l stroke
+newpath  1608   937 m  1608   986 l stroke
+newpath  2251   937 m  2251   986 l stroke
+newpath  2894   937 m  2894   986 l stroke
+newpath  3537   937 m  3537   986 l stroke
+newpath  4180   937 m  4180   986 l stroke
+newpath  4823   937 m  4823   986 l stroke
+newpath  5466   937 m  5466   986 l stroke
+0.00000 0.00000 0.00000 setrgbcolor
+newpath   866  1233 m   965  1233 l stroke
+newpath   866  1824 m   965  1824 l stroke
+newpath   866  2416 m   965  2416 l stroke
+newpath   866  3007 m   965  3007 l stroke
+newpath   866  3599 m   965  3599 l stroke
+newpath   866  4191 m   965  4191 l stroke
+newpath   915  1528 m   965  1528 l stroke
+newpath   915  2120 m   965  2120 l stroke
+newpath   915  2712 m   965  2712 l stroke
+newpath   915  3303 m   965  3303 l stroke
+newpath   915  3895 m   965  3895 l stroke
+[ ] 0 setdash
+    5 setlinewidth
+0.00000 0.00000 0.00000 setrgbcolor
+/Helvetica-Bold                           findfont    99 scalefont setfont
+/IX  1286 def /IY   739 def
+(-3)
+centshow 
+/IX  1929 def /IY   739 def
+(-2)
+centshow 
+/IX  2572 def /IY   739 def
+(-1)
+centshow 
+/IX  3215 def /IY   739 def
+(0)
+centshow 
+/IX  3858 def /IY   739 def
+(1)
+centshow 
+/IX  4501 def /IY   739 def
+(2)
+centshow 
+/IX  5144 def /IY   739 def
+(3)
+centshow 
+0.00000 0.00000 0.00000 setrgbcolor
+/IX   804 def /IY  1183 def
+(0)
+rightshow
+/IX   804 def /IY  1775 def
+(0.000001)
+rightshow
+/IX   804 def /IY  2366 def
+(0.000002)
+rightshow
+/IX   804 def /IY  2958 def
+(0.000003)
+rightshow
+/IX   804 def /IY  3549 def
+(0.000004)
+rightshow
+/IX   804 def /IY  4141 def
+(0.000005)
+rightshow
+newpath   322  4684 moveto stroke
+newpath   322  4634 moveto stroke
+showpage
+grestore
+%%Trailer
+%%Pages:     1
+% END OF DATAPLOT POSTSCRIPT FILE
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                %%Page: 1 1
 0 0 moveto    0.12000    0.12000 scale  5015    85 translate 90 rotate 
+1.00000 1.00000 1.00000 setrgbcolor
+    0     0 m
+ 6429     0 l
+ 6429  4929 l
+    0  4929 l
+    0     0 l
+closepath fill 0. 0. 0. setrgbcolor
+showpage
+grestore
+%%Trailer
+%%Pages:     1
+% END OF DATAPLOT POSTSCRIPT FILE
