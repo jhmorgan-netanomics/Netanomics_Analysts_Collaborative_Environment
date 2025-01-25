@@ -20,7 +20,7 @@
       for (var_name in string_variables) {
         data_frame <- string_to_integer(data_frame, var_name)
       }
-      
+    
     # Transform boolean variables to integers
       bool_vars <- colnames(data_frame)[types_list == "logical"]
       if (length(bool_vars) > 0) {
@@ -39,7 +39,7 @@
       export_names <- mapply(function(name, i) {
         if (nchar(name) > 8) {
           paste0("c_", i)
-        } else {
+        }else {
           name
         }
       }, var_names, seq_along(var_names))
@@ -56,18 +56,16 @@
       if (length(string_variables) > 0) {
         string_key <- data_frame[, c(string_variables, paste0(string_variables, "_id")), drop = FALSE]
       } else {
-        # If no string variables exist, create an empty data.frame
-        string_key <- data.frame()
+        string_key <- data.frame() # If no string variables exist, create an empty data.frame
       }
     
     # Sort types index
       sort_key <- ifelse(tolower(types_index$name) == "obs_id", -1, 
-                       as.integer(grepl("id", tolower(types_index$name))))
+                         as.integer(grepl("id", tolower(types_index$name))))
       types_index <- types_index[order(sort_key, types_index$name, decreasing = FALSE), ]
     
     # Create print elements
       end_command <- "END OF DATA"
-      space_element <- "\n"
     
     # Create label commands
       data_labels <- mapply(function(name, export_name) {
@@ -84,16 +82,13 @@
           "SET DATA MISSING VALUE missing",
           "SET READ MISSING VALUE 999"
         )
-      } else {
+      }else{
         c(
           "MAXIMUM RECORD LENGTH  9999",
           "SET DATA MISSING VALUE missing",
           "SET READ MISSING VALUE 999"
         )
       }
-    
-    # Build output content as a character vector
-      io_elements <- c(io_commands, space_element)
     
     # Initialize output list for data vectors
       output_list <- list()
@@ -105,22 +100,33 @@
         
         # Construct data_vector based on type
           data_vector <- if (data_type == "integer") {
-            # Format integers
             format_integers_to_string(data_frame[[index_value]], index_name)
           } else if (data_type == "numeric") {
-            # Format floating-point numbers
             format_floats_to_string(data_frame[[index_value]], index_name, data_type)
           } else {
             stop(sprintf("Unsupported data type: %s", data_type))
           }
         
-        # Store each column's data_vector in the output_list
-          output_list[[i]] <- c(data_vector, end_command, space_element)
+        # Add formatted command with separate SET READ FORMAT and READ lines
+          output_list[[i]] <- c(
+            data_vector[1],               # SET READ FORMAT
+            data_vector[2],               # READ
+            data_vector[-(1:2)],          # Data values
+            end_command,                  # END OF DATA
+            ""                            # Add a blank line after END OF DATA
+          )
       }
-      output_data <- unlist(output_list)
     
-    # Add data labels
-      output <- c(io_elements, output_data, data_labels)
+    # Flatten the data vectors directly
+      output_data <- unlist(output_list, use.names = FALSE)
+    
+    # Combine all sections with proper spacing
+      output <- c(
+        io_commands, # IO commands
+        "",          # Blank line after IO commands
+        output_data, # Data vectors with correct spacing
+        data_labels  # Variable labels (no extra blank line before this)
+      )
     
     # Write the output to a file
       outfile <- paste0("read_", data_name, ".DP")
