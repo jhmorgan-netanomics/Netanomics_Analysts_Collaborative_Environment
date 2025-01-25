@@ -3,7 +3,7 @@
 . 24 January 2025
 
 .   Setting Directory
-    cd /mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
+    cd /workspace/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration/Dataplot_functions
 .   dataplot
 .   PWD
 

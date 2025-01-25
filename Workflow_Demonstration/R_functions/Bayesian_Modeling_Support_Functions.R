@@ -2,6 +2,13 @@
 #Jonathan H. Morgan, Ph.D.
 #22 January 2025
 
+# Installing Bridge Sampling
+  if (!requireNamespace("bridgesampling", quietly = TRUE)) {
+    install.packages("bridgesampling")
+  } else {
+    message("The 'bridgesampling' package is already installed.")
+  }
+
 # Helper Functions
   `%notin%` <- Negate(`%in%`)
   

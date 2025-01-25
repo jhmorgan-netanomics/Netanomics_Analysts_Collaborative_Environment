@@ -159,6 +159,12 @@ RUN R -e "install.packages(c('tidyverse', 'dplyr', 'lme4', 'cowplot', 'igraph', 
 # Install devtools and its dependencies
 RUN R -e "install.packages('devtools', dependencies = TRUE, repos = 'https://cloud.r-project.org')"
 
+# Install required system libraries for cmdstanr
+RUN apt-get update && apt-get install -y \
+    libtbb2 \
+    libtbb-dev \
+    && apt-get clean
+
 # Install cmdstanr from Stan development R-universe
 RUN R -e "install.packages('cmdstanr', repos = c('https://stan-dev.r-universe.dev', getOption('repos')))"
 

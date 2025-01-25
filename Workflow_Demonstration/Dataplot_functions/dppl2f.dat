@@ -113,6 +113,114 @@ gsave    % SAVE INITIAL GRAPHICS STATE
     0  4929 l
     0     0 l
 closepath fill 0. 0. 0. setrgbcolor
+%!PS-Adobe-2.0
+%%Creator: Dataplot
+%%Title: Dataplot Postscript File
+%%CreationDate: NULL
+%%Pages: (atend)
+%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic
+%%+ Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique Courier
+%%+ Courier-Bold Courier-Oblique  Courier-BoldOblique
+%%+ AvantGarde-Book AvantGarde-BookOblique AvantGarde-Demi AvantGarde-DemiOblique
+%%+ Bookman-Demi Bookman-DemiItalic       Bookman-Light Bookman-LightItalic      
+%%+ Helvetica-Narrow Helvetica-Narrow-Bold Helvetica-Narrow-BoldOblique          
+%%+ Helvetica-Narrow-Oblique              NewCentury-Schlbk-Bold                 
+%%+ NewCentury-Schlbk-Italic              NewCenturySchlbk-BoldItalic            
+%%+ Palatino-Roman Palatino-Bold          Palatino-Italic Palatino-BoldItalic    
+%%+ ZapfChancery-MediumItalic  Symbol                                            
+%%BoundingBox: 0 0 792 792
+% DATAPLOT POSTSCRIPT DRIVER, JANUARY, 1990
+% PROLOG SECTION: DATAPLOT DEFINITIONS     
+%DEFINE PROCEDURE "rightshow" TO PRINT RIGHT JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) rightshow
+/rightshow
+  {dup stringwidth pop
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "centshow" TO PRINT CENTER JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) centshow
+/centshow
+  {dup stringwidth pop
+   2 div
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "leftshow" TO PRINT LEFT   JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) leftshow
+/leftshow
+  {IX IY moveto show} def
+%DEFINE PROCEDURE "vrightshow" TO PRINT RIGHT JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vrightshow grestore
+/vrightshow
+  {dup stringwidth pop
+   IY exch sub
+   IX exch moveto
+    90 rotate
+   show} def
+%DEFINE PROCEDURE "vcentshow" TO PRINT CENTER JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vcentshow grestore
+/vcentshow
+  {dup stringwidth pop
+   2 div
+   IY exch sub
+   IX exch moveto
+     90 rotate
+   show} def
+%DEFINE PROCEDURE "vleftshow" TO PRINT LEFT   JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vleftshow grestore
+/vleftshow
+  {IX IY moveto 90 rotate show} def 
+%DEFINE PROCEDURE "setpsfont" TO DEFINE THE POSTSCRIPT FONT NAME AND SIZE.  CALL BY:
+%  /PSFONT <FONTNAME> def /PSSIZE <FONTSIZE> def setpsfont
+/setpsfont
+  {PSFONT  findfont  PSSIZE  scalefont  setfont} def
+%DEFINE PROCEDURE "psstringwidthr" TO MOVE THE STARTING POSITION OF A RIGHT JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthr
+/psstringwidthr
+  {dup stringwidth pop 0 exch sub 0 rmoveto} def
+%DEFINE PROCEDURE "psstringwidthc" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthc
+/psstringwidthc
+  {dup stringwidth pop 2 div 0 exch sub 0 rmoveto}  def
+%DEFINE PROCEDURE "psstringwidthtv" TO MOVE THE STARTING POSITION OF A TOP JUSTIFIED VERTICA STRING.
+%CALL BY:
+%  (STRING) psstringwidthtv
+/psstringwidthtv
+  {dup stringwidth pop 0 exch sub 0 exch    rmoveto} def
+%DEFINE PROCEDURE "psstringwidthcv" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIEDVERTICAL STRING.
+%CALL BY:
+%  (STRING) psstringwidthcv
+/psstringwidthcv
+  {dup stringwidth pop 2 div 0 exch sub 0 exch rmoveto} def
+%DEFINE PROCEDURE "leftshow2" TO PRINT LEFT  JUSTIFIED STRING AT CURRENT POSITION.  CALL BY: 
+% (STRING) leftshow2
+/leftshow2
+  {show} def
+%DEFINE PROCEDURE "vleftshow2" TO PRINT BOTTOM  JUSTIFIED VERTICAL STRING.  CALL BY:
+% (STRING) vleftshow2
+/vleftshow2
+  {90 rotate show -90 rotate} def
+% DEFINE PROCEDURE "l" AS ABBREVIATION OF lineto    
+/l {lineto} def
+% DEFINE PROCEDURE "m" AS ABBREVIATION OF moveto    
+/m {moveto} def
+/Helvetica-Bold                           findfont  98 scalefont setfont
+gsave    % SAVE INITIAL GRAPHICS STATE   
+%%EndProlog
+%%Page: 1 1
+0 0 moveto    0.12000    0.12000 scale  5015    85 translate 90 rotate 
 1.00000 1.00000 1.00000 setrgbcolor
     0     0 m
  6429     0 l
@@ -120,93 +228,238 @@ closepath fill 0. 0. 0. setrgbcolor
     0  4929 l
     0     0 l
 closepath fill 0. 0. 0. setrgbcolor
-[ ] 0 setdash
-    5 setlinewidth
-0.00000 0.00000 0.00000 setrgbcolor
-newpath  2095   990 m  2106   990 l  2117   990 l  2129   990 l  2140   990 l  2151   990 l  2162   991 l  2173   992 l 
- 2184   993 l  2195   994 l  2207   995 l  2218   997 l  2229   998 l  2240  1000 l  2251  1003 l  2262  1006 l 
- 2273  1009 l  2285  1012 l  2296  1016 l  2307  1020 l  2318  1025 l  2329  1031 l  2340  1036 l  2351  1043 l 
- 2363  1050 l  2374  1058 l  2385  1066 l  2396  1075 l  2407  1084 l  2418  1095 l  2429  1105 l  2441  1117 l 
- 2452  1129 l  2463  1142 l  2474  1155 l  2485  1170 l  2496  1184 l  2507  1200 l  2519  1215 l  2530  1232 l 
- 2541  1248 l  2552  1266 l  2563  1283 l  2574  1302 l  2585  1320 l  2597  1339 l  2608  1358 l  2619  1378 l 
- 2630  1397 l  2641  1417 l  2652  1438 l  2663  1458 l  2674  1479 l  2686  1500 l  2697  1521 l  2708  1543 l 
- 2719  1564 l  2730  1586 l  2741  1608 l  2752  1631 l  2764  1653 l  2775  1676 l  2786  1699 l  2797  1722 l 
- 2808  1746 l  2819  1769 l  2830  1793 l  2842  1817 l  2853  1841 l  2864  1866 l  2875  1890 l  2886  1914 l 
- 2897  1939 l  2908  1963 l  2920  1987 l  2931  2011 l  2942  2035 l  2953  2058 l  2964  2082 l  2975  2105 l 
- 2986  2127 l  2998  2150 l  3009  2172 l  3020  2194 l  3031  2215 l  3042  2236 l  3053  2258 l  3064  2279 l 
- 3076  2300 l  3087  2321 l  3098  2342 l  3109  2364 l  3120  2386 l  3131  2409 l  3142  2433 l  3153  2458 l 
- 3165  2484 l  3176  2512 l  3187  2542 l  3198  2574 l  3209  2608 l  3220  2645 l  3231  2684 l  3243  2726 l 
- 3254  2772 l  3265  2820 l  3276  2872 l  3287  2926 l  3298  2984 l  3309  3045 l  3321  3109 l  3332  3176 l 
- 3343  3245 l  3354  3315 l  3365  3388 l  3376  3461 l  3387  3534 l  3399  3607 l  3410  3679 l  3421  3750 l 
- 3432  3817 l  3443  3882 l  3454  3942 l  3465  3997 l  3477  4047 l  3488  4090 l  3499  4126 l  3510  4155 l 
- 3521  4175 l  3532  4187 l  3543  4191 l  3555  4185 l  3566  4170 l  3577  4147 l  3588  4115 l  3599  4075 l 
- 3610  4026 l  3621  3971 l  3633  3908 l  3644  3840 l  3655  3766 l  3666  3688 l  3677  3606 l  3688  3521 l 
- 3699  3434 l  3710  3346 l  3722  3258 l  3733  3170 l  3744  3084 l  3755  3000 l  3766  2918 l  3777  2840 l 
- 3788  2765 l  3800  2694 l  3811  2627 l  3822  2566 l  3833  2509 l  3844  2457 l  3855  2410 l  3866  2368 l 
- 3878  2331 l  3889  2298 l  3900  2271 l  3911  2247 l  3922  2229 l  3933  2214 l  3944  2202 l  3956  2194 l 
- 3967  2190 l  3978  2188 l  3989  2188 l  4000  2191 l  4011  2195 l  4022  2201 l  4034  2209 l  4045  2217 l 
- 4056  2226 l  4067  2235 l  4078  2244 l  4089  2253 l  4100  2262 l  4112  2270 l  4123  2277 l  4134  2284 l 
- 4145  2289 l  4156  2293 l  4167  2296 l  4178  2297 l  4190  2297 l  4201  2295 l  4212  2291 l  4223  2285 l 
- 4234  2278 l  4245  2269 l  4256  2258 l  4267  2245 l  4279  2230 l  4290  2214 l  4301  2195 l stroke newpath  4301  2195 m 
- 4312  2175 l  4323  2153 l  4334  2129 l  4345  2103 l  4357  2076 l  4368  2047 l  4379  2017 l  4390  1985 l 
- 4401  1952 l  4412  1918 l  4423  1883 l  4435  1847 l  4446  1810 l  4457  1772 l  4468  1734 l  4479  1696 l 
- 4490  1658 l  4501  1620 l  4513  1582 l  4524  1544 l  4535  1508 l  4546  1472 l  4557  1436 l  4568  1402 l 
- 4579  1370 l  4591  1338 l  4602  1308 l  4613  1279 l  4624  1252 l  4635  1227 l  4646  1203 l  4657  1180 l 
- 4669  1160 l  4680  1141 l  4691  1123 l  4702  1107 l  4713  1092 l  4724  1079 l  4735  1067 l  4747  1057 l 
- 4758  1047 l  4769  1039 l  4780  1031 l  4791  1024 l  4802  1019 l  4813  1014 l  4824  1009 l  4836  1006 l 
- 4847  1002 l  4858  1000 l  4869   997 l  4880   996 l  4891   994 l  4902   993 l  4914   992 l  4925   991 l 
- 4936   990 l stroke
-[ ] 0 setdash
-    5 setlinewidth
-0.00000 0.00000 0.00000 setrgbcolor
-newpath  2351   988 m  2360   989 l  2368   989 l  2377   990 l  2386   991 l  2394   992 l  2403   994 l  2411   996 l 
- 2420  1000 l  2428  1004 l  2437  1008 l  2445  1014 l  2454  1021 l  2463  1030 l  2471  1040 l  2480  1051 l 
- 2488  1065 l  2497  1079 l  2505  1096 l  2514  1115 l  2522  1135 l  2531  1156 l  2540  1180 l  2548  1204 l 
- 2557  1229 l  2565  1254 l  2574  1280 l  2582  1305 l  2591  1330 l  2599  1353 l  2608  1374 l  2616  1394 l 
- 2625  1410 l  2634  1424 l  2642  1435 l  2651  1442 l  2659  1446 l  2668  1447 l  2676  1444 l  2685  1438 l 
- 2693  1429 l  2702  1418 l  2711  1404 l  2719  1389 l  2728  1373 l  2736  1356 l  2745  1339 l  2753  1322 l 
- 2762  1305 l  2770  1289 l  2779  1275 l  2788  1262 l  2796  1251 l  2805  1242 l  2813  1234 l  2822  1228 l 
- 2830  1224 l  2839  1222 l  2847  1222 l  2856  1223 l  2864  1225 l  2873  1228 l  2882  1233 l  2890  1238 l 
- 2899  1243 l  2907  1249 l  2916  1255 l  2924  1262 l  2933  1268 l  2941  1274 l  2950  1279 l  2959  1284 l 
- 2967  1288 l  2976  1291 l  2984  1293 l  2993  1295 l  3001  1295 l  3010  1295 l  3018  1294 l  3027  1293 l 
- 3036  1292 l  3044  1292 l  3053  1292 l  3061  1294 l  3070  1297 l  3078  1303 l  3087  1312 l  3095  1324 l 
- 3104  1340 l  3112  1359 l  3121  1381 l  3130  1407 l  3138  1435 l  3147  1466 l  3155  1498 l  3164  1530 l 
- 3172  1562 l  3181  1593 l  3189  1622 l  3198  1647 l  3207  1669 l  3215  1686 l  3224  1699 l  3232  1707 l 
- 3241  1711 l  3249  1710 l  3258  1706 l  3266  1700 l  3275  1691 l  3284  1682 l  3292  1675 l  3301  1669 l 
- 3309  1668 l  3318  1672 l  3326  1682 l  3335  1702 l  3343  1730 l  3352  1770 l  3361  1822 l  3369  1886 l 
- 3378  1963 l  3386  2054 l  3395  2158 l  3403  2274 l  3412  2403 l  3420  2542 l  3429  2689 l  3437  2844 l 
- 3446  3003 l  3455  3164 l  3463  3323 l  3472  3479 l  3480  3626 l  3489  3763 l  3497  3885 l  3506  3990 l 
- 3514  4075 l  3523  4138 l  3532  4177 l  3540  4191 l  3549  4178 l  3557  4140 l  3566  4076 l  3574  3989 l 
- 3583  3880 l  3591  3752 l  3600  3606 l  3609  3448 l  3617  3280 l  3626  3106 l  3634  2928 l  3643  2751 l 
- 3651  2578 l  3660  2411 l  3668  2253 l  3677  2105 l  3685  1968 l  3694  1845 l  3703  1735 l  3711  1639 l 
- 3720  1555 l  3728  1484 l  3737  1425 l  3745  1376 l  3754  1337 l  3762  1306 l  3771  1283 l  3780  1265 l 
- 3788  1252 l  3797  1242 l  3805  1235 l  3814  1230 l  3822  1226 l  3831  1222 l  3839  1219 l  3848  1216 l 
- 3857  1213 l  3865  1210 l  3874  1206 l  3882  1202 l  3891  1199 l  3899  1195 l  3908  1192 l  3916  1190 l 
- 3925  1188 l  3934  1187 l  3942  1186 l  3951  1186 l  3959  1188 l  3968  1189 l  3976  1191 l  3985  1194 l 
- 3993  1196 l  4002  1199 l  4010  1201 l  4019  1203 l  4028  1204 l  4036  1204 l  4045  1204 l stroke newpath  4045  1204 m 
- 4053  1202 l  4062  1200 l  4070  1198 l  4079  1195 l  4087  1193 l  4096  1190 l  4105  1188 l  4113  1188 l 
- 4122  1188 l  4130  1191 l  4139  1195 l  4147  1201 l  4156  1209 l  4164  1219 l  4173  1231 l  4182  1245 l 
- 4190  1260 l  4199  1276 l  4207  1292 l  4216  1307 l  4224  1322 l  4233  1335 l  4241  1346 l  4250  1355 l 
- 4258  1360 l  4267  1362 l  4276  1361 l  4284  1355 l  4293  1347 l  4301  1334 l  4310  1319 l  4318  1301 l 
- 4327  1281 l  4335  1259 l  4344  1235 l  4353  1212 l  4361  1188 l  4370  1164 l  4378  1142 l  4387  1121 l 
- 4395  1101 l  4404  1083 l  4412  1067 l  4421  1053 l  4430  1040 l  4438  1030 l  4447  1021 l  4455  1013 l 
- 4464  1007 l  4472  1002 l  4481   998 l  4489   995 l  4498   993 l  4507   991 l  4515   990 l  4524   989 l 
- 4532   989 l stroke
-[ ] 0 setdash
-    5 setlinewidth
-0.00000 0.00000 0.00000 setrgbcolor
-newpath  1286   740 m  5787   740 l stroke
-[ ] 0 setdash
-    5 setlinewidth
-0.00000 0.00000 0.00000 setrgbcolor
-newpath  1286  4437 m  1286   740 l stroke
-[ ] 0 setdash
-    5 setlinewidth
-0.00000 0.00000 0.00000 setrgbcolor
-newpath  1608   789 m  1608   690 l stroke
-newpath  2572   789 m  2572   690 l stroke
-newpath  3537   789 m  3537   690 l stroke
-newpath  4501   789 m  4501   690 l stroke
-newpath  5466   789 m  5466   690 l stroke
-newpath  2090   764 m  2090   715 l stroke
-newpath  3054   764 m  3054   715 l stroke
+%!PS-Adobe-2.0
+%%Creator: Dataplot
+%%Title: Dataplot Postscript File
+%%CreationDate: NULL
+%%Pages: (atend)
+%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic
+%%+ Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique Courier
+%%+ Courier-Bold Courier-Oblique  Courier-BoldOblique
+%%+ AvantGarde-Book AvantGarde-BookOblique AvantGarde-Demi AvantGarde-DemiOblique
+%%+ Bookman-Demi Bookman-DemiItalic       Bookman-Light Bookman-LightItalic      
+%%+ Helvetica-Narrow Helvetica-Narrow-Bold Helvetica-Narrow-BoldOblique          
+%%+ Helvetica-Narrow-Oblique              NewCentury-Schlbk-Bold                 
+%%+ NewCentury-Schlbk-Italic              NewCenturySchlbk-BoldItalic            
+%%+ Palatino-Roman Palatino-Bold          Palatino-Italic Palatino-BoldItalic    
+%%+ ZapfChancery-MediumItalic  Symbol                                            
+%%BoundingBox: 0 0 792 792
+% DATAPLOT POSTSCRIPT DRIVER, JANUARY, 1990
+% PROLOG SECTION: DATAPLOT DEFINITIONS     
+%DEFINE PROCEDURE "rightshow" TO PRINT RIGHT JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) rightshow
+/rightshow
+  {dup stringwidth pop
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "centshow" TO PRINT CENTER JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) centshow
+/centshow
+  {dup stringwidth pop
+   2 div
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "leftshow" TO PRINT LEFT   JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) leftshow
+/leftshow
+  {IX IY moveto show} def
+%DEFINE PROCEDURE "vrightshow" TO PRINT RIGHT JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vrightshow grestore
+/vrightshow
+  {dup stringwidth pop
+   IY exch sub
+   IX exch moveto
+    90 rotate
+   show} def
+%DEFINE PROCEDURE "vcentshow" TO PRINT CENTER JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vcentshow grestore
+/vcentshow
+  {dup stringwidth pop
+   2 div
+   IY exch sub
+   IX exch moveto
+     90 rotate
+   show} def
+%DEFINE PROCEDURE "vleftshow" TO PRINT LEFT   JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vleftshow grestore
+/vleftshow
+  {IX IY moveto 90 rotate show} def 
+%DEFINE PROCEDURE "setpsfont" TO DEFINE THE POSTSCRIPT FONT NAME AND SIZE.  CALL BY:
+%  /PSFONT <FONTNAME> def /PSSIZE <FONTSIZE> def setpsfont
+/setpsfont
+  {PSFONT  findfont  PSSIZE  scalefont  setfont} def
+%DEFINE PROCEDURE "psstringwidthr" TO MOVE THE STARTING POSITION OF A RIGHT JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthr
+/psstringwidthr
+  {dup stringwidth pop 0 exch sub 0 rmoveto} def
+%DEFINE PROCEDURE "psstringwidthc" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthc
+/psstringwidthc
+  {dup stringwidth pop 2 div 0 exch sub 0 rmoveto}  def
+%DEFINE PROCEDURE "psstringwidthtv" TO MOVE THE STARTING POSITION OF A TOP JUSTIFIED VERTICA STRING.
+%CALL BY:
+%  (STRING) psstringwidthtv
+/psstringwidthtv
+  {dup stringwidth pop 0 exch sub 0 exch    rmoveto} def
+%DEFINE PROCEDURE "psstringwidthcv" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIEDVERTICAL STRING.
+%CALL BY:
+%  (STRING) psstringwidthcv
+/psstringwidthcv
+  {dup stringwidth pop 2 div 0 exch sub 0 exch rmoveto} def
+%DEFINE PROCEDURE "leftshow2" TO PRINT LEFT  JUSTIFIED STRING AT CURRENT POSITION.  CALL BY: 
+% (STRING) leftshow2
+/leftshow2
+  {show} def
+%DEFINE PROCEDURE "vleftshow2" TO PRINT BOTTOM  JUSTIFIED VERTICAL STRING.  CALL BY:
+% (STRING) vleftshow2
+/vleftshow2
+  {90 rotate show -90 rotate} def
+% DEFINE PROCEDURE "l" AS ABBREVIATION OF lineto    
+/l {lineto} def
+% DEFINE PROCEDURE "m" AS ABBREVIATION OF moveto    
+/m {moveto} def
+/Helvetica-Bold                           findfont  98 scalefont setfont
+gsave    % SAVE INITIAL GRAPHICS STATE   
+%%EndProlog
+%%Page: 1 1
+0 0 moveto    0.12000    0.12000 scale  5015    85 translate 90 rotate 
+1.00000 1.00000 1.00000 setrgbcolor
+    0     0 m
+ 6429     0 l
+ 6429  4929 l
+    0  4929 l
+    0     0 l
+closepath fill 0. 0. 0. setrgbcolor
+%!PS-Adobe-2.0
+%%Creator: Dataplot
+%%Title: Dataplot Postscript File
+%%CreationDate: NULL
+%%Pages: (atend)
+%%DocumentFonts: Times-Roman Times-Bold Times-Italic Times-BoldItalic
+%%+ Helvetica Helvetica-Bold Helvetica-Oblique Helvetica-BoldOblique Courier
+%%+ Courier-Bold Courier-Oblique  Courier-BoldOblique
+%%+ AvantGarde-Book AvantGarde-BookOblique AvantGarde-Demi AvantGarde-DemiOblique
+%%+ Bookman-Demi Bookman-DemiItalic       Bookman-Light Bookman-LightItalic      
+%%+ Helvetica-Narrow Helvetica-Narrow-Bold Helvetica-Narrow-BoldOblique          
+%%+ Helvetica-Narrow-Oblique              NewCentury-Schlbk-Bold                 
+%%+ NewCentury-Schlbk-Italic              NewCenturySchlbk-BoldItalic            
+%%+ Palatino-Roman Palatino-Bold          Palatino-Italic Palatino-BoldItalic    
+%%+ ZapfChancery-MediumItalic  Symbol                                            
+%%BoundingBox: 0 0 792 792
+% DATAPLOT POSTSCRIPT DRIVER, JANUARY, 1990
+% PROLOG SECTION: DATAPLOT DEFINITIONS     
+%DEFINE PROCEDURE "rightshow" TO PRINT RIGHT JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) rightshow
+/rightshow
+  {dup stringwidth pop
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "centshow" TO PRINT CENTER JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) centshow
+/centshow
+  {dup stringwidth pop
+   2 div
+   IX exch sub
+   IY moveto
+   show} def
+%DEFINE PROCEDURE "leftshow" TO PRINT LEFT   JUSTIFIED STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% (STRING) leftshow
+/leftshow
+  {IX IY moveto show} def
+%DEFINE PROCEDURE "vrightshow" TO PRINT RIGHT JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vrightshow grestore
+/vrightshow
+  {dup stringwidth pop
+   IY exch sub
+   IX exch moveto
+    90 rotate
+   show} def
+%DEFINE PROCEDURE "vcentshow" TO PRINT CENTER JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vcentshow grestore
+/vcentshow
+  {dup stringwidth pop
+   2 div
+   IY exch sub
+   IX exch moveto
+     90 rotate
+   show} def
+%DEFINE PROCEDURE "vleftshow" TO PRINT LEFT   JUSTIFIED VERTICAL STRING.  CALL BY:
+%  /IX <XCOOR> def /IY <YCOOR> def 
+% newpath IX IY moveto gsave
+% (STRING) vleftshow grestore
+/vleftshow
+  {IX IY moveto 90 rotate show} def 
+%DEFINE PROCEDURE "setpsfont" TO DEFINE THE POSTSCRIPT FONT NAME AND SIZE.  CALL BY:
+%  /PSFONT <FONTNAME> def /PSSIZE <FONTSIZE> def setpsfont
+/setpsfont
+  {PSFONT  findfont  PSSIZE  scalefont  setfont} def
+%DEFINE PROCEDURE "psstringwidthr" TO MOVE THE STARTING POSITION OF A RIGHT JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthr
+/psstringwidthr
+  {dup stringwidth pop 0 exch sub 0 rmoveto} def
+%DEFINE PROCEDURE "psstringwidthc" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIED STRING.
+%CALL BY:
+%  (STRING) psstringwidthc
+/psstringwidthc
+  {dup stringwidth pop 2 div 0 exch sub 0 rmoveto}  def
+%DEFINE PROCEDURE "psstringwidthtv" TO MOVE THE STARTING POSITION OF A TOP JUSTIFIED VERTICA STRING.
+%CALL BY:
+%  (STRING) psstringwidthtv
+/psstringwidthtv
+  {dup stringwidth pop 0 exch sub 0 exch    rmoveto} def
+%DEFINE PROCEDURE "psstringwidthcv" TO MOVE THE STARTING POSITION OF A CENTER JUSTIFIEDVERTICAL STRING.
+%CALL BY:
+%  (STRING) psstringwidthcv
+/psstringwidthcv
+  {dup stringwidth pop 2 div 0 exch sub 0 exch rmoveto} def
+%DEFINE PROCEDURE "leftshow2" TO PRINT LEFT  JUSTIFIED STRING AT CURRENT POSITION.  CALL BY: 
+% (STRING) leftshow2
+/leftshow2
+  {show} def
+%DEFINE PROCEDURE "vleftshow2" TO PRINT BOTTOM  JUSTIFIED VERTICAL STRING.  CALL BY:
+% (STRING) vleftshow2
+/vleftshow2
+  {90 rotate show -90 rotate} def
+% DEFINE PROCEDURE "l" AS ABBREVIATION OF lineto    
+/l {lineto} def
+% DEFINE PROCEDURE "m" AS ABBREVIATION OF moveto    
+/m {moveto} def
+/Helvetica-Bold                           findfont  98 scalefont setfont
+gsave    % SAVE INITIAL GRAPHICS STATE   
+%%EndProlog
+%%Page: 1 1
+0 0 moveto    0.12000    0.12000 scale  5015    85 translate 90 rotate 
+1.00000 1.00000 1.00000 setrgbcolor
+    0     0 m
+ 6429     0 l
+ 6429  4929 l
+    0  4929 l
+    0     0 l
+closepath fill 0. 0. 0. setrgbcolor
+showpage
+grestore
+%%Trailer
+%%Pages:     1
+% END OF DATAPLOT POSTSCRIPT FILE

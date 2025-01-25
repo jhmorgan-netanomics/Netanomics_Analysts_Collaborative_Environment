@@ -4,7 +4,7 @@
 #22 January 2025
 
 #   Activating Local Environment
-    cd("/mnt/d/GitHub_Repositories/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration")
+    cd("/workspace/Netanomics_Analysts_Collaborative_Environment/Workflow_Demonstration")
     using Pkg
     Pkg.activate("julia_env")
     Pkg.status()
