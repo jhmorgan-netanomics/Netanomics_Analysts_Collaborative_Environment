@@ -1,10 +1,9 @@
-    9
+    8
 OBS_ID       1       200
-D            2       200
-M            3       200
-MAP_EST      4       200
-RESID        5       200
-Y1           6       200
-X            7       199
-Y2           8       199
-Y_REF        9       200
+B2           2       200
+D            3       200
+M            4       200
+MAP_EST      5       200
+RESID        6       200
+X_REF        7       200
+Y_REF        8       200

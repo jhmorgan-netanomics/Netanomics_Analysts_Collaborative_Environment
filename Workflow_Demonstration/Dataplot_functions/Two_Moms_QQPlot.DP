@@ -24,12 +24,11 @@ CALL read_two_moms_map.DP
     x_ref = XPLOT
     y_ref = YPLOT
 
-    LET x_1 = -3
-    LET y_1 = 0
+    LET x_1 = MINIMUM x_ref
+    LET y_1 = MINIMUM y_ref
 
-    LET x_max = 3
+    LET x_max = MAXIMUM x_ref
     y_max = MAXIMUM y_ref
-
 
 . ---------------------- .
 .    CREATING QQ PLOT    .
@@ -74,8 +73,12 @@ COMMENT Plot Settings
     TITLE Normal Probability Plot of the Model Residuals
     NORMAL PROBABILITY PLOT resid
 
-    LINE SOLID; LINE COLOR black
+    LINE SOLID; LINE COLOR brown
     DRAWDATA x_1 y_1 x_max y_max
+
+    LINE COLOR black
+    DRAWDATA 0 y_1 0 y_max
+    DRAWDATA x_1 0 x_max 0
 
     LET PPA0 = ROUND(PPA0,3)
     LET PPA1 = ROUND(PPA1,3)

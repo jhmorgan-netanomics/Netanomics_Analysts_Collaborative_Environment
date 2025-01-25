@@ -179,17 +179,21 @@
     # Format numeric values to strings with the specified precision
       formatted_str <- sprintf(paste0("%.", precision, "f"), variable)
     
-    # Split into whole and decimal parts
+    # Split into whole and decimal parts, preserving the negative sign
       parts <- strsplit(formatted_str, "\\.", fixed = FALSE)
       whole_parts <- sapply(parts, `[`, 1) # Extract whole number part
       decimal_parts <- sapply(parts, `[`, 2, USE.NAMES = FALSE) # Extract decimal part
-      
-    # Determine maximum width for padding
-      max_whole_width <- max(nchar(whole_parts))
-      max_decimal_places <- precision # Fixed based on the desired precision
     
-    # Pad whole parts with leading zeros
-      padded_whole_parts <- sprintf(paste0("%0", max_whole_width, "d"), as.numeric(whole_parts))
+    # Preserve the negative sign
+      signs <- ifelse(substr(whole_parts, 1, 1) == "-", "-", "") # Extract negative sign
+      magnitudes <- gsub("-", "", whole_parts)                  # Remove negative sign for padding
+    
+    # Determine maximum width for padding
+      max_whole_width <- max(nchar(magnitudes)) # Width of magnitude only
+      max_decimal_places <- precision           # Fixed based on the desired precision
+    
+    # Pad whole parts with leading zeros and reapply signs
+      padded_whole_parts <- paste0(signs, sprintf(paste0("%0", max_whole_width, "d"), as.numeric(magnitudes)))
     
     # Pad decimal parts with trailing zeros
       padded_decimal_parts <- sprintf(paste0("%-", max_decimal_places, "s"), decimal_parts)
@@ -202,10 +206,11 @@
       total_width <- max_whole_width + 1 + max_decimal_places # +1 for the decimal point
       set_command <- sprintf("SET READ FORMAT 1F%d.%d", total_width, max_decimal_places)
       read_command <- sprintf("READ %s", var_name)
-      
+    
     # Return a plain character vector
       return(c(set_command, read_command, padded_floats))
   }
+  
   
 # Highest Density Posterior Interval (HDPI) function in R
   HPDI <- function(x, alpha = 0.11) {
