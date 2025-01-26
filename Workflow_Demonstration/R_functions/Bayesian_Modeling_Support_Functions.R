@@ -617,4 +617,122 @@
     # Return to Normal Layout
       par(mfrow = c(1, 1))
   }
-  
+
+# Taylor Diagram
+  taylor_diagram <- function(ref, batch, add = FALSE, model_n, couleur = "red", m_bias = FALSE, title = "Taylor Diagram") {
+    # Taylor Diagram Function
+    # Developed by Olivier Eterradossi, with enhancements and fixes by Jonathan H. Morgan, Ph.D.
+    # Last Updated: January 9, 2007
+    # Reference: https://stat.ethz.ch/pipermail/r-help/2007-January/123343.html
+
+    # Purpose:
+    # The Taylor diagram quantifies how well a model reproduces observed behavior using:
+    #   - Pearson correlation coefficient
+    #   - Root-Mean-Square Error (RMSE)
+    #   - Standard deviation
+    # It facilitates comparing models by visualizing these metrics in a single plot.
+
+    # Example Data for Testing:
+    #   ref <- rnorm(30, sd = 2)  # Reference data
+    #   model1 <- ref + rnorm(30) / 2
+    #   model2 <- ref + rnorm(30)
+
+    x <- ref
+    y <- batch
+
+    # Predefined gradients for correlation
+      grad.corr.full <- c(0, 0.2, 0.4, 0.6, 0.8, 0.9, 0.95, 0.99, 1)
+      grad.corr.lines <- c(0.2, 0.4, 0.6, 0.8, 0.9)
+
+    # Correlation and standard deviations
+      R <- cor(x, y, use = "pairwise")
+      sd.r <- sd(x)
+      sd.f <- sd(y)
+      maxray <- 1.5 * max(sd.f, sd.r)
+      discrete <- seq(180, 0, by = -1)
+      listepoints <- NULL
+
+    # Plot the Taylor diagram
+      if (!add) {
+        # Set plot parameters
+          par(mar = c(1, 1, 1, 1), mgp = c(2, 0.4, 0), bty = "n", family = "serif")
+          plot(c(-maxray, maxray), c(0, maxray), type = "n", asp = 1, bty = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", family = "serif")
+
+        # Draw outer boundary
+          for (i in discrete) {
+            listepoints <- cbind(listepoints, maxray * cos(i * pi / 180), maxray * sin(i * pi / 180))
+          }
+          listepoints <- t(matrix(listepoints, 2))
+          lines(listepoints[, 1], listepoints[, 2])
+
+        # Draw axes
+          lines(c(-maxray, maxray), c(0, 0)) # x-axis
+          lines(c(0, 0), c(0, maxray)) # y-axis
+
+        # Correlation radial lines
+          for (i in grad.corr.lines) {
+            lines(c(0, maxray * i), c(0, maxray * sqrt(1 - i^2)), lty = 3)
+            lines(c(0, -maxray * i), c(0, maxray * sqrt(1 - i^2)), lty = 3)
+          }
+
+        # Correlation text
+          for (i in grad.corr.full) {
+            text(1.05 * maxray * i, 1.05 * maxray * sqrt(1 - i^2), i, cex = 1)
+            text(-1.05 * maxray * i, 1.05 * maxray * sqrt(1 - i^2), -i, cex = 1)
+          }
+
+        # Concentric standard deviation lines (around the reference)
+          seq.sd <- seq(0, 2 * maxray, by = maxray / 10)
+          for (i in seq.sd) {
+            xcircle <- sd.r + cos(discrete * pi / 180) * i
+            ycircle <- sin(discrete * pi / 180) * i
+            for (j in seq_along(xcircle)) {
+              if ((xcircle[j]^2 + ycircle[j]^2) < (maxray^2)) {
+                points(xcircle[j], ycircle[j], col = "darkgreen", pch = ".")
+                if (j == 10) text(xcircle[j], ycircle[j], signif(i, 2), cex = 1, col = "darkgreen")
+              }
+            }
+          }
+
+      # Concentric standard deviation lines (around the origin)
+        seq.sd <- seq(0, maxray, length.out = 5)
+        for (i in seq.sd) {
+          xcircle <- cos(discrete * pi / 180) * i
+          ycircle <- sin(discrete * pi / 180) * i
+          lines(xcircle, ycircle, lty = 3, col = "blue")
+          text(min(xcircle), -0.03 * maxray, signif(i, 2), cex = 1, col = "blue")
+          text(max(xcircle), -0.03 * maxray, signif(i, 2), cex = 1, col = "blue")
+        }
+
+      # Add labels and title
+        text(0, -0.08 * maxray, "Standard Deviation", cex = 0.9, col = "blue")
+        text(0, -0.14 * maxray, "Centered RMS Difference", cex = 0.9, col = "darkgreen")
+        text(0, (1.1 * maxray) + 0.1, "Correlation Coefficient", cex = 0.9, family = "serif")
+        points(sd.r, 0, pch = 22, bg = "darkgreen", cex = 1.1)
+        title(title, line = -2, family = "serif")
+      }
+
+    # Add model points
+      par(new = TRUE)
+      plot(c(-maxray, maxray), c(0, maxray), type = "n", asp = 1, bty = "n", xaxt = "n", yaxt = "n", xlab = "", ylab = "", family = "serif")
+      points(sd.f * cos(acos(R)), sd.f * sin(acos(R)), pch = 21, bg = couleur, cex = 0.9)
+      text(sd.f * cos(acos(R)), sd.f * sin(acos(R)), model_n, cex = 0.8, pos = 2, col = couleur)
+
+    # Add bias arrows if enabled
+      if (m_bias) {
+        m.r <- mean(x)
+        m.f <- mean(y)
+        bias <- m.f - m.r
+
+        dd <- rbind(mp = c(sd.f * R, sd.f * sin(acos(R))), rp = c(sd.r, 0))
+        v1 <- solve(cbind(1, dd[, 1])) %*% dd[, 2]
+        v2 <- c(dd[1, 2] + dd[1, 1] / v1[2], -1 / v1[2])
+        nm <- dd[1, ] - c(0, v2[1])
+        nm <- nm / sqrt(sum(nm^2))
+        bp <- dd[1, ] + bias * nm
+
+        arrows(x0 = dd[1, 1], x1 = bp[1], y0 = dd[1, 2], y1 = bp[2], col = couleur, length = 0.05, lwd = 1.5)
+        lines(rbind(dd[2, ], bp), col = couleur, lty = 3)
+        lines(dd, col = couleur, lty = 3)
+      }
+  }

@@ -36,8 +36,23 @@ generated quantities {
     vector[N] prior_mu_D;
     vector[N] prior_D;
 
+    // Posterior Predictive Distributions
+    vector[N] posterior_D;
+
+    // Maximum A Posteriori (MAP) Estimate
+    real MAP_D;
+
+    // Generate prior predictive values
     for (n in 1:N) {
         prior_mu_D[n] = a2;  // Intercept-only model
         prior_D[n] = normal_rng(prior_mu_D[n], sigma_D);
     }
+
+    // Generate posterior predictive values
+    for (n in 1:N) {
+        posterior_D[n] = normal_rng(mu_D[n], sigma_D);
+    }
+
+    // Calculate the MAP for Daughter Family Size
+    MAP_D = a2;  // The MAP corresponds to the posterior mode of the intercept (a2)
 }
