@@ -1,8 +1,9 @@
 # Netanomics Common Collaborative Analysts' Environment
 # Jonathan H. Morgan, Ph.D.
-# 14 December 2024
+# 31 March 2026
+
 # Use the official Ubuntu base image
-FROM ubuntu:22.04
+FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
 
 # Set environment variable to non-interactive mode for apt
 ENV DEBIAN_FRONTEND=noninteractive
@@ -19,12 +20,18 @@ RUN echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
         wget \
         curl \
         build-essential \
+        cmake \
+        libsodium-dev \
         gcc \
         gfortran \
         libx11-dev \
         libxft-dev \
         libgd-dev \
         libtiff-dev \
+        libpng-dev \
+        libjpeg-dev \
+        libuv1-dev \
+        libwebp-dev \
         libcairo2 \
         libcairo2-dev \
         libreadline-dev \
@@ -36,6 +43,7 @@ RUN echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
         libssl-dev \
         libxml2-dev \
         libcurl4-openssl-dev \
+        libsqlite3-dev \
         libgit2-dev \
         libfontconfig1-dev \
         libharfbuzz-dev \
@@ -49,147 +57,105 @@ RUN echo "tzdata tzdata/Areas select America" | debconf-set-selections && \
         git && \
     apt-get clean
 
-# Set PKG_CONFIG_PATH to ensure pkg-config finds the libraries
 ENV PKG_CONFIG_PATH="/usr/lib/x86_64-linux-gnu/pkgconfig:/usr/local/lib/pkgconfig:/usr/share/pkgconfig"
 
 # ----------------------------------------
 # 2. Add System Fonts & Configure Locales
 # ----------------------------------------
 
-# Create a directory for custom fonts
-RUN mkdir -p /usr/share/fonts/truetype/custom
+RUN mkdir -p /usr/share/fonts/truetype/custom && \
+    curl -L -o /tmp/fonts.zip https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collaborative_Environment/archive/refs/heads/main.zip && \
+    unzip /tmp/fonts.zip 'Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/*' -d /tmp/ && \
+    cp /tmp/Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/* /usr/share/fonts/truetype/custom/ && \
+    fc-cache -fv && \
+    rm -rf /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main && \
+    apt-get update && apt-get install -y locales && \
+    locale-gen en_US.UTF-8 && \
+    update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Fetch fonts from your GitHub repository and place them in the custom fonts directory
-RUN curl -L -o /tmp/fonts.zip https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collaborative_Environment/archive/refs/heads/main.zip \
-    && unzip /tmp/fonts.zip 'Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/*' -d /tmp/ \
-    && mkdir -p /usr/share/fonts/truetype/custom/ \
-    && cp /tmp/Netanomics_Analysts_Collaborative_Environment-main/tools/fonts/* /usr/share/fonts/truetype/custom/ \
-    && fc-cache -fv \
-    && rm -rf /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
-
-# Configure locales
-RUN apt-get update && apt-get install -y locales \
-    && locale-gen en_US.UTF-8 \
-    && update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
-
-# Set environment variables for the locales
-ENV LANG=en_US.UTF-8 \
-    LC_ALL=en_US.UTF-8
-
-# Clean up to reduce image size
-RUN apt-get clean && rm -rf /var/lib/apt/lists/* /tmp/fonts.zip /tmp/Netanomics_Analysts_Collaborative_Environment-main
+ENV LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8
 
 # ----------------------------------------
 # 3. Install Dataplot
 # ----------------------------------------
 
 WORKDIR /tmp/nist_dataplot
-RUN git clone https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collaborative_Environment.git /tmp/nist_dataplot
+RUN git clone https://github.com/usnistgov/dataplot.git /tmp/nist_dataplot
 
-WORKDIR /tmp/nist_dataplot/tools/dataplot/src
-RUN make clean && make && make install
-
-# Rename the original Dataplot binary
-RUN mv /usr/local/bin/dataplot /usr/local/bin/dataplot-original
-
-# Wrapper Script for Dataplot
-RUN echo '#!/bin/bash\n\
+WORKDIR /tmp/nist_dataplot/src
+RUN sed -i 's/^      PARAMETER (MAXOBV=2000000)/      PARAMETER (MAXOBV=5000000)/' DPCOPA.INC && \
+    grep 'PARAMETER (MAXOBV=5000000)' DPCOPA.INC || (echo "ERROR: MAXOBV patch failed" && exit 1) && \
+    sed -i '/^FFLAGS/s/$/ -mcmodel=medium/' Makefile && \
+    sed -i '/^CFLAGS/s/$/ -mcmodel=medium/' Makefile && \
+    grep 'mcmodel=medium' Makefile || (echo "ERROR: mcmodel patch failed" && exit 1) && \
+    make clean && make && make install && \
+    mv /usr/local/bin/dataplot /usr/local/bin/dataplot-original && \
+    echo '#!/bin/bash\n\
 if [ -z "$DISPLAY" ]; then\n\
     echo "No DISPLAY found. Falling back to xvfb-run..."\n\
     xvfb-run -a /usr/local/bin/dataplot-original "$@"\n\
 else\n\
     /usr/local/bin/dataplot-original "$@"\n\
 fi' > /usr/local/bin/dataplot-wrapper.sh && \
-    chmod +x /usr/local/bin/dataplot-wrapper.sh
-
-# Symlink for convenience
-RUN ln -s /usr/local/bin/dataplot-wrapper.sh /usr/local/bin/dataplot
+    chmod +x /usr/local/bin/dataplot-wrapper.sh && \
+    ln -s /usr/local/bin/dataplot-wrapper.sh /usr/local/bin/dataplot
 
 # ----------------------------------------
-# 4. Install the Latest Version of Julia
+# 4. Install Julia 1.11.9
 # ----------------------------------------
 
-# Ensure wget is installed
-RUN apt-get update && apt-get install -y wget && apt-get clean
-
-# Install Julia (always fetch the latest stable version)
-RUN JULIA_VERSION=$(curl -s https://julialang.org/downloads/ | grep -oP 'https://julialang-s3.julialang.org/bin/linux/x64/\d+\.\d+/julia-\d+\.\d+\.\d+-linux-x86_64.tar.gz' | head -1) && \
-    wget $JULIA_VERSION && \
-    JULIA_TAR=$(basename $JULIA_VERSION) && \
-    tar -xvzf $JULIA_TAR && \
-    JULIA_DIR=$(tar -tf $JULIA_TAR | head -1 | cut -f1 -d"/") && \
-    mv $JULIA_DIR /opt/julia && \
+RUN apt-get update && apt-get install -y wget && apt-get clean && \
+    wget https://julialang-s3.julialang.org/bin/linux/x64/1.11/julia-1.11.9-linux-x86_64.tar.gz && \
+    tar -xvzf julia-1.11.9-linux-x86_64.tar.gz && \
+    mv julia-1.11.9 /opt/julia && \
     ln -s /opt/julia/bin/julia /usr/local/bin/julia && \
-    rm $JULIA_TAR
+    ln -s /opt/julia/bin/julia /usr/bin/julia && \
+    ln -s /opt/julia/bin/julia /usr/local/sbin/julia && \
+    rm julia-1.11.9-linux-x86_64.tar.gz
 
-# Install Julia Packages
 RUN julia -e 'using Pkg; \
     Pkg.add(["Revise", "OhMyREPL", "TerminalPager", "CSV", "DataFrames", \
              "Pkg", "Chain", "Combinatorics", "Dates", "Glob", "JSON3", \
              "JSONTables", "LinearAlgebra", "NamedArrays", "Printf", \
-             "Statistics", "StatsBase", "StringDistances"]);'
-
-# Create symlinks for Julia binary (if needed in specific paths)
-RUN ln -s /opt/julia/bin/julia /usr/bin/julia && \
-    ln -s /opt/julia/bin/julia /usr/local/sbin/julia
+             "Statistics", "StatsBase", "StringDistances", \
+             "LsqFit", "EzXML", "ProgressMeter", "Random", \
+             "ArgParse", "PackageCompiler"]);'
 
 # ----------------------------------------
 # 5. Install R
 # ----------------------------------------
 
-# Add CRAN repository and install R
 RUN apt-get update && \
     apt-get install -y software-properties-common && \
     wget -qO- https://cloud.r-project.org/bin/linux/ubuntu/marutter_pubkey.asc | gpg --dearmor > /etc/apt/trusted.gpg.d/cran_ubuntu_key.gpg && \
     add-apt-repository 'deb https://cloud.r-project.org/bin/linux/ubuntu jammy-cran40/' && \
     apt-get update && \
-    apt-get install -y r-base
+    apt-get install -y r-base r-base-dev git && \
+    apt-get clean
 
-# Install R build tools and Git for installing packages from GitHub
-RUN apt-get update && \
-    apt-get install -y r-base-dev git
+RUN R -e "install.packages(c('systemfonts', 'textshaping', 'ragg', 'fs'), repos='https://cloud.r-project.org')"
 
-# Install necessary R dependencies, including additional requested packages
 RUN R -e "install.packages(c('tidyverse', 'dplyr', 'lme4', 'cowplot', 'igraph', 'stringr', 'purrr', 'tidyr', 'httr', 'jsonlite', \
                              'HLMdiag', 'predictmeans', 'bayesplot', 'posterior', 'loo', 'BMS', 'tikzDevice', 'knitr', 'rstan', 'parallel', 'readxl', 'datetimeutils', \
                              'sysfonts', 'extrafont', 'showtext', 'readr', 'psch', 'forecast', 'plotrix', 'RColorBrewer', 'circlize', 'languageserver', \
-                             'network', 'sna', 'ergm', 'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet', 'bridgesampling'), \
+                             'network', 'sna', 'ergm', 'tergm', 'btergm', 'ergm.multi', 'RSiena', 'ideanet', 'bridgesampling', \
+                             'data.table', 'ggplot2'), \
                              repos='https://cloud.r-project.org')"
 
-# Install devtools and its dependencies
 RUN R -e "install.packages('devtools', dependencies = TRUE, repos = 'https://cloud.r-project.org')"
 
-# Install required system libraries for cmdstanr
+RUN apt-get update && apt-get install -y libtbb2 libtbb-dev && apt-get clean && \
+    R -e "install.packages('cmdstanr', repos = c('https://stan-dev.r-universe.dev', getOption('repos')))" && \
+    R -e "cmdstanr::install_cmdstan(cores = 2)"
+
+RUN R -e "devtools::install_github('ekmaloney/inteRact', dependencies = TRUE)" && \
+    R -e "devtools::install_github('ahcombs/actdata', dependencies = TRUE)"
+
 RUN apt-get update && apt-get install -y \
-    libtbb2 \
-    libtbb-dev \
-    && apt-get clean
+    build-essential libcurl4-openssl-dev libssl-dev libxml2-dev wget nano && \
+    R -e "install.packages(c('bit', 'ff', 'fastmatch', 'remotes'), repos = 'https://cloud.r-project.org')"
 
-# Install cmdstanr from Stan development R-universe
-RUN R -e "install.packages('cmdstanr', repos = c('https://stan-dev.r-universe.dev', getOption('repos')))"
-
-# Install CmdStan for cmdstanr
-RUN R -e "cmdstanr::install_cmdstan(cores = 2)"
-
-# Install inteRact from GitHub with dependencies
-RUN R -e "devtools::install_github('ekmaloney/inteRact', dependencies = TRUE)"
-
-# Install actdata from GitHub with dependencies
-RUN R -e "devtools::install_github('ahcombs/actdata', dependencies = TRUE)"
-
-# Install necessary system dependencies
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    libcurl4-openssl-dev \
-    libssl-dev \
-    libxml2-dev \
-    wget \
-    nano
-
-# Install R dependencies for tabplot
-RUN R -e "install.packages(c('bit', 'ff', 'fastmatch'), repos = 'https://cloud.r-project.org')"
-
-# Download and patch ffbase
 WORKDIR /tmp
 RUN wget https://cran.r-project.org/src/contrib/Archive/ffbase/ffbase_0.13.3.tar.gz && \
     tar -xvzf ffbase_0.13.3.tar.gz && \
@@ -198,102 +164,85 @@ RUN wget https://cran.r-project.org/src/contrib/Archive/ffbase/ffbase_0.13.3.tar
     sed -i 's/Sint/int/g' src/grouprunningcumsumindex.c && \
     cd .. && \
     tar -cvzf ffbase_0.13.3_patched.tar.gz ffbase && \
-    R CMD INSTALL ffbase_0.13.3_patched.tar.gz
-
-# Install tabplot from GitHub
-RUN R -e "install.packages('remotes', repos = 'https://cloud.r-project.org')"
-RUN R -e "remotes::install_github('mtennekes/tabplot')"
-
-# Clean up temporary files
-RUN rm -rf /tmp/ffbase /tmp/ffbase_0.13.3.tar.gz /tmp/ffbase_0.13.3_patched.tar.gz
-
-# Verify installation (optional)
-RUN R -e "library(tabplot); library(ggplot2); print('tabplot and dependencies installed successfully!')"
-
-# Create a symlink for R binary for convenience
-RUN ln -s /usr/bin/R /usr/local/bin/R && \
+    R CMD INSTALL ffbase_0.13.3_patched.tar.gz && \
+    rm -rf /tmp/ffbase /tmp/ffbase_0.13.3.tar.gz /tmp/ffbase_0.13.3_patched.tar.gz && \
+    R -e "remotes::install_github('mtennekes/tabplot')" && \
+    R -e "library(tabplot); library(ggplot2); print('tabplot and dependencies installed successfully!')" && \
+    ln -s /usr/bin/R /usr/local/bin/R && \
     ln -s /usr/bin/Rscript /usr/local/bin/Rscript
 
 # ----------------------------------------
 # 6. Install RStudio Server
 # ----------------------------------------
 
-# Install dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    ca-certificates gdebi-core git libssl-dev wget
-
-# Set UBUNTU_CODENAME for compatibility
 ENV UBUNTU_CODENAME="jammy"
 
-# Download and install RStudio Server
-RUN wget "https://rstudio.org/download/latest/stable/server/${UBUNTU_CODENAME}/rstudio-server-latest-amd64.deb" -O rstudio-server.deb && \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates gdebi-core git libssl-dev wget && \
+    wget "https://rstudio.org/download/latest/stable/server/${UBUNTU_CODENAME}/rstudio-server-latest-amd64.deb" -O rstudio-server.deb && \
     gdebi -n rstudio-server.deb && \
-    rm rstudio-server.deb
-
-# Configure RStudio
-RUN ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin && \
+    rm rstudio-server.deb && \
+    ln -fs /usr/lib/rstudio-server/bin/rstudio-server /usr/local/bin && \
     ln -fs /usr/lib/rstudio-server/bin/rserver /usr/local/bin && \
     echo "rsession-which-r=$(which R)" > /etc/rstudio/rserver.conf && \
     echo "auth-none=1" >> /etc/rstudio/rserver.conf && \
-    echo "www-frame-origin=same" >> /etc/rstudio/rserver.conf
-
-# Configure logging for RStudio
-RUN echo '[*]' > /etc/rstudio/logging.conf && \
+    echo "www-frame-origin=same" >> /etc/rstudio/rserver.conf && \
+    echo '[*]' > /etc/rstudio/logging.conf && \
     echo 'log-level=info' >> /etc/rstudio/logging.conf && \
     echo 'logger-type=file' >> /etc/rstudio/logging.conf && \
     echo 'log-dir=/var/log/rstudio-server' >> /etc/rstudio/logging.conf
 
-# Expose RStudio port
 EXPOSE 8787
 
 # ----------------------------------------
-# 7. Install Python and Required Packages
+# 7. Install Python and Required Packages (Including SBI Packages)
 # ----------------------------------------
 
-# Install Python 3 and pip
 RUN apt-get update && \
     apt-get install -y python3 python3-pip python3-dev && \
-    apt-get clean
+    apt-get clean && \
+    python3 -m pip install --upgrade pip
 
-# Upgrade pip
-RUN python3 -m pip install --upgrade pip
-
-# Install Python packages
 RUN pip3 install --no-cache-dir \
-    pandas \
-    numpy \
-    pexpect \
-    nltk \
-    textblob \
-    bertopic \
-    beautifulsoup4 \
-    pymc \
-    cmdstanpy \
-    arviz \
-    seaborn \
-    scipy \
-    matplotlib \
-    xarray \
-    networkx \
-    nxpd \
-    ipython \
-    mesa \
-    champ \
-    igraph \
-    transformers \
-    tensorflow \
-    scikit-learn \
-    forceatlas2
-
-# Create symlink for Python binary for convenience
-RUN [ ! -e /usr/local/bin/python ] && ln -s /usr/bin/python3 /usr/local/bin/python || true && \
+    pandas numpy pexpect nltk textblob bertopic beautifulsoup4 \
+    pymc cmdstanpy arviz seaborn scipy matplotlib xarray \
+    networkx nxpd ipython mesa champ igraph transformers \
+    tensorflow scikit-learn forceatlas2 && \
+    [ ! -e /usr/local/bin/python ] && ln -s /usr/bin/python3 /usr/local/bin/python || true && \
     [ ! -e /usr/local/bin/pip ] && ln -s /usr/bin/pip3 /usr/local/bin/pip || true
 
+# Install Python 3.11 and SBI environment
+RUN apt-get update && apt-get install -y \
+    libsqlite3-dev libssl-dev zlib1g-dev libncurses-dev \
+    libreadline-dev libbz2-dev libexpat1-dev liblzma-dev \
+    libffi-dev uuid-dev build-essential && apt-get clean && \
+    cd /tmp && \
+    wget https://www.python.org/ftp/python/3.11.9/Python-3.11.9.tgz && \
+    tar -xzf Python-3.11.9.tgz && \
+    cd Python-3.11.9 && \
+    find . -name 'config.cache' -delete && \
+    ./configure --enable-optimizations && \
+    make -j$(nproc) && \
+    make altinstall && \
+    rm -rf /tmp/Python-3.11.9 /tmp/Python-3.11.9.tgz && \
+    python3.11 -m venv /opt/sbi-env
+
+ENV PATH="/opt/sbi-env/bin:$PATH"
+
+RUN /opt/sbi-env/bin/pip install --upgrade pip && \
+    /opt/sbi-env/bin/pip install \
+        torch --index-url https://download.pytorch.org/whl/cu121
+
+RUN /opt/sbi-env/bin/pip install \
+        git+https://github.com/bayesflow-org/bayesflow.git@compositional_sampling_diffusion \
+        jax[cuda12] numba scikit-learn igraph corner pyabc
+
+ENV KERAS_BACKEND=torch
+
 # ----------------------------------------
-# 8. Add Julia Configuration (startup.jl)
+# 8-10. Julia, R, and Bash Configuration
 # ----------------------------------------
- 
-# Create .julia/config directory and write startup.jl
+
 RUN mkdir -p /root/.julia/config && \
     echo '# Set environment variables' > /root/.julia/config/startup.jl && \
     echo 'ENV["JULIA_CMDSTAN_HOME"] = "/opt/cmdstan"' >> /root/.julia/config/startup.jl && \
@@ -306,12 +255,10 @@ RUN mkdir -p /root/.julia/config && \
     echo '# Keep Modes Sticky' >> /root/.julia/config/startup.jl && \
     echo 'import REPL' >> /root/.julia/config/startup.jl && \
     echo 'Base.atreplinit() do repl' >> /root/.julia/config/startup.jl && \
-    echo '    # Make the ; shell mode sticky' >> /root/.julia/config/startup.jl && \
     echo '    !isdefined(repl, :interface) && (repl.interface = REPL.setup_interface(repl))' >> /root/.julia/config/startup.jl && \
     echo '    repl.interface.modes[2].sticky = true' >> /root/.julia/config/startup.jl && \
     echo 'end' >> /root/.julia/config/startup.jl && \
     echo '' >> /root/.julia/config/startup.jl && \
-    echo '# Keeping Packages Synchronized' >> /root/.julia/config/startup.jl && \
     echo 'atreplinit() do repl' >> /root/.julia/config/startup.jl && \
     echo '    @async try' >> /root/.julia/config/startup.jl && \
     echo '        sleep(0.1)' >> /root/.julia/config/startup.jl && \
@@ -321,291 +268,252 @@ RUN mkdir -p /root/.julia/config && \
     echo '    end' >> /root/.julia/config/startup.jl && \
     echo 'end' >> /root/.julia/config/startup.jl && \
     echo '' >> /root/.julia/config/startup.jl && \
-    echo '# Check if a project-specific startup file exists and include it' >> /root/.julia/config/startup.jl && \
     echo 'project_startup_file = joinpath(pwd(), "project_startup.jl")' >> /root/.julia/config/startup.jl && \
     echo 'if isfile(project_startup_file)' >> /root/.julia/config/startup.jl && \
     echo '    include(project_startup_file)' >> /root/.julia/config/startup.jl && \
-    echo 'end' >> /root/.julia/config/startup.jl
- 
-# ----------------------------------------
-# 9. Add R Configuration (.Renviron)
-# ----------------------------------------
- 
-# Create .Renviron in the user's home directory and add environment variables
-RUN echo 'JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.Renviron && \
+    echo 'end' >> /root/.julia/config/startup.jl && \
+    echo 'JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.Renviron && \
     echo 'PYTHON="/usr/bin/python3"' >> /root/.Renviron && \
     echo 'CURL="/usr/bin/curl"' >> /root/.Renviron && \
     echo 'LANG="en_US.UTF-8"' >> /root/.Renviron && \
-    echo 'LC_ALL="en_US.UTF-8"' >> /root/.Renviron
- 
-# ----------------------------------------
-# 10. Add Bash Configuration (.bashrc)
-# ----------------------------------------
- 
-# Add environment variables to .bashrc
-RUN echo 'export JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.bashrc && \
+    echo 'LC_ALL="en_US.UTF-8"' >> /root/.Renviron && \
+    echo 'export JULIA_CMDSTAN_HOME="/opt/cmdstan"' >> /root/.bashrc && \
     echo 'export PYTHON="/usr/bin/python3"' >> /root/.bashrc && \
     echo 'export CURL="/usr/bin/curl"' >> /root/.bashrc
- 
+
 # ----------------------------------------
 # 11. Install Interoperability Packages
 # ----------------------------------------
- 
-# Install PyCall, RCall, and PythonCall in Julia
-RUN julia -e 'using Pkg; Pkg.add(["PyCall", "RCall", "PythonCall"]);'
- 
-# Set Python executable for PyCall
-RUN julia -e 'using PyCall; PyCall.python = "/usr/bin/python3"; PyCall.PyNULL()'
- 
-# Install reticulate and JuliaCall in R
-RUN R -e "install.packages(c('reticulate', 'JuliaCall'), repos='https://cloud.r-project.org')"
- 
-# Set RETICULATE_PYTHON environment variable in .Renviron
-RUN echo 'RETICULATE_PYTHON=/usr/bin/python3' >> /root/.Renviron
- 
-# Verify reticulate configuration
-RUN R -e "library(reticulate); use_python('/usr/bin/python3', required = TRUE); py_config()"
- 
-# Install rpy2 in Python
-RUN pip install rpy2 
- 
-# Install the Python package julia using pip3
-RUN python3 -m pip install --upgrade pip
-RUN python3 -m pip install julia
- 
-# Install IJulia in Julia
-RUN julia -e 'using Pkg; Pkg.add("IJulia")'
- 
-# Initialize PyJulia
-RUN python3 -c "import julia; julia.install()"
- 
-# Verify PyJulia installation
-RUN python3 -c "import julia; print('PyJulia installed successfully')"
- 
-# Create init_pyjulia.py using echo commands
+
+RUN julia -e 'using Pkg; Pkg.add(["PyCall", "RCall", "PythonCall"]);' && \
+    julia -e 'using PyCall; PyCall.python = "/usr/bin/python3"; PyCall.PyNULL()'
+
+RUN R -e "install.packages(c('reticulate', 'JuliaCall'), repos='https://cloud.r-project.org')" && \
+    echo 'RETICULATE_PYTHON=/usr/bin/python3' >> /root/.Renviron && \
+    R -e "library(reticulate); use_python('/usr/bin/python3', required = TRUE); py_config()"
+
+RUN pip install rpy2 && \
+    python3 -m pip install --upgrade pip && \
+    python3 -m pip install julia && \
+    julia -e 'using Pkg; Pkg.add("IJulia")' && \
+    python3 -c "import julia; julia.install()" && \
+    python3 -c "import julia; print('PyJulia installed successfully')"
+
 WORKDIR /workspace
 RUN git clone https://github.com/jhmorgan-netanomics/Netanomics_Analysts_Collaborative_Environment.git /tmp/casos_repo && \
     cp /tmp/casos_repo/build/init_pyjulia.py /workspace/init_pyjulia.py && \
-    rm -rf /tmp/casos_repo
-
-# Verify the initialization script works
-RUN python3 /workspace/init_pyjulia.py
+    rm -rf /tmp/casos_repo && \
+    python3 /workspace/init_pyjulia.py
 
 # ----------------------------------------
 # 12. Installing Graphviz
 # ----------------------------------------
 
 RUN apt-get update && \
-    apt-get install -y \
-    graphviz \
-    libgraphviz-dev && \
-    apt-get clean
-
-# Install Python bindings for Graphviz
-RUN pip3 install --no-cache-dir graphviz
-
-# Verify Graphviz installation
-RUN dot -V
-
-# Create symlink for Graphviz
-RUN ln -s /usr/bin/dot /usr/local/bin/dot
+    apt-get install -y graphviz libgraphviz-dev && \
+    apt-get clean && \
+    pip3 install --no-cache-dir graphviz && \
+    dot -V && \
+    ln -s /usr/bin/dot /usr/local/bin/dot
 
 # ----------------------------------------
 # 13. Install Generic Mapping Tools (GMT)
 # ----------------------------------------
 
-# Install GMT from the official repository
 RUN apt-get update && \
-    apt-get install -y \
-    gdal-bin \
-    graphicsmagick \
-    ffmpeg \
-    gmt \
-    gmt-dcw \
-    gmt-gshhg && \
-    apt-get clean
-
-# Test GMT installation
-RUN gmt --version && \
+    apt-get install -y gdal-bin graphicsmagick ffmpeg gmt gmt-dcw gmt-gshhg && \
+    apt-get clean && \
+    gmt --version && \
     echo "digraph G { A -> B; B -> C; C -> A; }" > /workspace/test.dot && \
-    gmt pscoast -R-90/-70/0/20 -JM6i -Baf -Gred -P > /workspace/test.ps
-
-
-# Create a symlink for GMT
-RUN ln -s /usr/bin/gmt /usr/local/bin/gmt
+    gmt pscoast -R-90/-70/0/20 -JM6i -Baf -Gred -P > /workspace/test.ps && \
+    ln -s /usr/bin/gmt /usr/local/bin/gmt
 
 # ----------------------------------------
-# 14. Optional: Install Dropbox Integration
+# 14. Install Wine and Pajek
 # ----------------------------------------
 
-# Install Dropbox Python SDK
+RUN dpkg --add-architecture i386 && \
+    mkdir -pm755 /etc/apt/keyrings && \
+    wget -O /etc/apt/keyrings/winehq-archive.key \
+    https://dl.winehq.org/wine-builds/winehq.key && \
+    wget -NP /etc/apt/sources.list.d/ \
+    https://dl.winehq.org/wine-builds/ubuntu/dists/jammy/winehq-jammy.sources
+
+RUN apt-get update && \
+    apt-get install -y --install-recommends winehq-stable && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+RUN ln -s /opt/wine-stable/lib/wine/x86_64-unix/wine-preloader \
+    /opt/wine-stable/bin/wine-preloader && \
+    timeout 120 xvfb-run /opt/wine-stable/bin/wine \
+    wineboot --init 2>/dev/null || true && \
+    mkdir -p /root/.wine/drive_c/windows/syswow64 && \
+    cp /opt/wine-stable/lib/wine/i386-windows/*.dll \
+    /root/.wine/drive_c/windows/syswow64/ && \
+    mkdir -p "/root/.wine/drive_c/Program Files/Pajek" && \
+    wget -q -O /tmp/Pajek64.zip \
+    http://mrvar.fdv.uni-lj.si/pajek/Setup602/64/Pajek64.zip && \
+    unzip -q -o /tmp/Pajek64.zip \
+    -d "/root/.wine/drive_c/Program Files/Pajek" && \
+    rm -f /tmp/Pajek64.zip
+
+# Create all Pajek launch scripts
+RUN echo '#!/bin/bash\n\
+/opt/wine-stable/bin/wineserver -k 2>/dev/null\n\
+killall -9 wine Pajek.exe 2>/dev/null\n\
+sleep 1\n\
+export DISPLAY=${DISPLAY:-:100.0}\n\
+/opt/wine-stable/bin/wine \\\n\
+    "/root/.wine/drive_c/Program Files/Pajek/Pajek.exe" \\\n\
+    "$@" 2>/dev/null &\n\
+echo "Pajek launched on DISPLAY=$DISPLAY (PID: $!)"' \
+    > /usr/local/bin/pajek && \
+    chmod +x /usr/local/bin/pajek && \
+    echo '#!/bin/bash\n\
+PAJEK_URL="${1:-http://mrvar.fdv.uni-lj.si/pajek/Setup602/64/Pajek64.zip}"\n\
+PAJEK_DIR="/root/.wine/drive_c/Program Files/Pajek"\n\
+echo "=== Pajek Installer ==="\n\
+/opt/wine-stable/bin/wineserver -k 2>/dev/null\n\
+killall -9 wine Pajek.exe PajekXXL.exe Pajek3XL.exe 2>/dev/null\n\
+sleep 1\n\
+if [ -d "$PAJEK_DIR" ]; then rm -rf "$PAJEK_DIR"; fi\n\
+wget -q --show-progress -O /tmp/Pajek64.zip "$PAJEK_URL"\n\
+if [ $? -ne 0 ]; then echo "ERROR: Download failed."; exit 1; fi\n\
+mkdir -p "$PAJEK_DIR"\n\
+unzip -q -o /tmp/Pajek64.zip -d "$PAJEK_DIR"\n\
+if [ $? -ne 0 ]; then echo "ERROR: Unzip failed."; exit 1; fi\n\
+rm -f /tmp/Pajek64.zip\n\
+if [ -f "$PAJEK_DIR/Pajek.exe" ]; then\n\
+    echo "=== Pajek installed successfully ==="\n\
+    ls -la "$PAJEK_DIR"/*.exe\n\
+else echo "ERROR: Pajek.exe not found."; exit 1; fi' \
+    > /usr/local/bin/install_pajek && \
+    chmod +x /usr/local/bin/install_pajek && \
+    echo '#!/bin/bash\n\
+/opt/wine-stable/bin/wineserver -k 2>/dev/null\n\
+killall -9 wine Pajek3XL.exe 2>/dev/null\n\
+sleep 1\n\
+export DISPLAY=${DISPLAY:-:100.0}\n\
+/opt/wine-stable/bin/wine \\\n\
+    "/root/.wine/drive_c/Program Files/Pajek/Pajek3XL.exe" \\\n\
+    "$@" 2>/dev/null &\n\
+echo "Pajek3XL launched on DISPLAY=$DISPLAY (PID: $!)"' \
+    > /usr/local/bin/start_Pajek3XL && \
+    chmod +x /usr/local/bin/start_Pajek3XL && \
+    echo '#!/bin/bash\n\
+/opt/wine-stable/bin/wineserver -k 2>/dev/null\n\
+killall -9 wine PajekXXL.exe 2>/dev/null\n\
+sleep 1\n\
+export DISPLAY=${DISPLAY:-:100.0}\n\
+/opt/wine-stable/bin/wine \\\n\
+    "/root/.wine/drive_c/Program Files/Pajek/PajekXXL.exe" \\\n\
+    "$@" 2>/dev/null &\n\
+echo "PajekXXL launched on DISPLAY=$DISPLAY (PID: $!)"' \
+    > /usr/local/bin/start_PajekXXL && \
+    chmod +x /usr/local/bin/start_PajekXXL
+
+# ----------------------------------------
+# 15. Optional: Install Dropbox Integration
+# ----------------------------------------
+
 RUN pip3 install --no-cache-dir dropbox
-
-# Copy the shell script into the image
 COPY copy_dropbox_keys.sh /usr/local/bin/copy_dropbox_keys.sh
-RUN chmod +x /usr/local/bin/copy_dropbox_keys.sh
-
-# Run the script to conditionally copy dropbox_keys.json
-RUN /usr/local/bin/copy_dropbox_keys.sh
-
-# Copy the Dropbox helper functions
 COPY dropbox_integration.py /workspace/dropbox_integration.py
 COPY dropbox_utils.py /workspace/dropbox_utils.py
-
+RUN chmod +x /usr/local/bin/copy_dropbox_keys.sh && \
+    /usr/local/bin/copy_dropbox_keys.sh
 
 # ----------------------------------------
-# 15. Optional Google Drive Integration
+# 16. Optional Google Drive Integration
 # ----------------------------------------
 
-# Install required packages for Google integration
 RUN pip install --no-cache-dir \
-    google-api-python-client \
-    google-auth \
-    google-auth-oauthlib \
-    google-auth-httplib2 \
-    google-cloud-storage \
-    google-cloud-bigquery \
-    PyDrive \
-    oauth2client
-
-# Copy the shell script to handle the conditional copy of google_credentials.json
+    google-api-python-client google-auth google-auth-oauthlib \
+    google-auth-httplib2 google-cloud-storage google-cloud-bigquery \
+    PyDrive oauth2client
 COPY copy_google_credentials.sh /usr/local/bin/copy_google_credentials.sh
-RUN chmod +x /usr/local/bin/copy_google_credentials.sh
-
-# Run the script to conditionally copy google_credentials.json
-RUN /usr/local/bin/copy_google_credentials.sh
-
-# Copy the Google Drive helper functions
 COPY google_integration.py /workspace/google_integration.py
 COPY google_utils.py /workspace/google_utils.py
-
-# Set proper permissions for the Google helper scripts
-RUN chmod 644 /workspace/google_integration.py /workspace/google_utils.py
-
-# Move Google credentials to a secure location and set proper permissions if they exist
-RUN if [ -f /tmp/google_credentials.json ]; then \
+RUN chmod +x /usr/local/bin/copy_google_credentials.sh && \
+    /usr/local/bin/copy_google_credentials.sh && \
+    chmod 644 /workspace/google_integration.py /workspace/google_utils.py && \
+    if [ -f /tmp/google_credentials.json ]; then \
         mkdir -p /root/.config/google_credentials && \
         mv /tmp/google_credentials.json /root/.config/google_credentials/google_credentials.json && \
         chmod 600 /root/.config/google_credentials/google_credentials.json; \
     else \
         echo "Google credentials not provided. Skipping Google integration."; \
     fi
-    
+
 # ----------------------------------------
-# 16. Install JupyterLab, MetaKernel, and Supporting Kernels
+# 17. Install JupyterLab, MetaKernel, and Supporting Kernels
 # ----------------------------------------
 
-# Install build tools for Python packages
+RUN apt-get update && apt-get install -y python3-dev build-essential && apt-get clean && \
+    pip3 install --no-cache-dir jupyterlab metakernel bash_kernel pillow && \
+    (pip3 install git+https://github.com/Calysto/metakernel_bash.git@master || true) && \
+    (pip3 install git+https://github.com/Calysto/metakernel_python.git@master || true) && \
+    julia -e 'using Pkg; Pkg.add("IJulia"); using IJulia; installkernel("Julia")' && \
+    python3 -m bash_kernel.install && \
+    R -e "install.packages('IRkernel', repos='https://cloud.r-project.org')" && \
+    R -e "IRkernel::installspec(user = FALSE)" && \
+    python3 -c "from PIL import Image, ImageChops; print(\"PIL verified\")" && \
+    python3 -c "import metakernel; print(\"MetaKernel installed successfully\")"
+
+# ----------------------------------------
+# 18. EC2 IO Tools
+# ----------------------------------------
+
 RUN apt-get update && apt-get install -y \
-    python3-dev \
-    build-essential && \
-    apt-get clean
-
-# Install JupyterLab
-RUN pip3 install --no-cache-dir jupyterlab
-
-# Install MetaKernel and its dependencies
-RUN pip3 install --no-cache-dir \
-    metakernel \
-    bash_kernel \
-    pillow
-
-# Optionally install MetaKernel Bash and Python support from source
-RUN pip3 install git+https://github.com/Calysto/metakernel_bash.git@master || true
-RUN pip3 install git+https://github.com/Calysto/metakernel_python.git@master || true
-
-# Install Julia kernel using IJulia
-RUN julia -e 'using Pkg; Pkg.add("IJulia"); using IJulia; installkernel("Julia")'
-
-# Install and configure the Bash kernel
-RUN python3 -m bash_kernel.install
-
-# Install R kernel
-RUN R -e "install.packages('IRkernel', repos='https://cloud.r-project.org')"
-RUN R -e "IRkernel::installspec(user = FALSE)"
-
-# Verify PIL and related dependencies
-RUN python3 -c "from PIL import Image, ImageChops; print(\"PIL verified\")"
-
-# Verify MetaKernel installation
-RUN python3 -c "import metakernel; print(\"MetaKernel installed successfully\")"
-
-# ----------------------------------------
-# 17. EC2 IO Tools
-# ----------------------------------------
-
-# Install necessary tools: SSH client, Docker CLI, and basic utilities
-RUN apt-get update && apt-get install -y \
-    openssh-client \
-    curl \
-    ca-certificates \
-    docker.io \
-    nano
-
-# Copy the docker_utils.sh script into the container
+    openssh-client curl ca-certificates docker.io nano
 COPY docker_utils.sh /root/docker_utils.sh
-
-# Source the script in the root user's .bashrc
 RUN echo 'source /root/docker_utils.sh' >> /root/.bashrc
 
 # ----------------------------------------
-# 18. Add dbus and configure workspace
+# 19. Add dbus and configure workspace
 # ----------------------------------------
 
-# Install dbus and dependencies
-RUN apt-get update && apt-get install -y dbus dbus-user-session
+RUN apt-get update && apt-get install -y dbus dbus-user-session && \
+    mkdir -p /run/user/1000 && chmod 700 /run/user/1000
 
-# Create necessary directories for dbus
-RUN mkdir -p /run/user/1000 && chmod 700 /run/user/1000
-
-# Set default DBUS_SESSION_BUS_ADDRESS
 ENV DBUS_SESSION_BUS_ADDRESS="unix:path=/run/user/1000/bus"
 
 # ----------------------------------------
-# 19. Create Workspace Directory and Setup
+# 20. Create Workspace Directory and Setup
 # ----------------------------------------
 
-# Install PyXDG for Openbox
 RUN apt-get update && apt-get install -y python3-pyxdg && apt-get clean
 
-# Set the default working directory to /workspace
 WORKDIR /workspace
 
-# Create VSCode configuration for Julia, R, and Python
-COPY configure_vscode.sh /usr/local/bin/configure_vscode.sh
-RUN chmod +x /usr/local/bin/configure_vscode.sh
-RUN /usr/local/bin/configure_vscode.sh
+RUN mkdir -p /workspace/.vscode && \
+    echo '{\n\
+    "julia.executablePath": "/usr/bin/julia",\n\
+    "r.rterm.linux": "/usr/local/bin/R",\n\
+    "r.rpath.linux": "/usr/local/bin/R",\n\
+    "python.pythonPath": "/usr/local/bin/python",\n\
+    "terminal.integrated.fontFamily": "monospace",\n\
+    "julia.additionalArgs": [\n\
+        "--banner=yes"\n\
+    ],\n\
+    "r.lsp.diagnostics": false\n\
+}' > /workspace/.vscode/settings.json
 
-# Copy start_workspace.sh directly into the image
 COPY start_workspace.sh /usr/local/bin/start_workspace.sh
-RUN chmod +x /usr/local/bin/start_workspace.sh
-
-# Copy start_jupyterlab.sh into the image
 COPY start_jupyterlab.sh /usr/local/bin/start_jupyterlab.sh
-RUN chmod +x /usr/local/bin/start_jupyterlab.sh
-
-# Expose JupyterLab's default port
-EXPOSE 8888
-
-# Copy update_rstudio.sh into the image
 COPY update_rstudio.sh /usr/local/bin/update_rstudio.sh
-RUN chmod +x /usr/local/bin/update_rstudio.sh
-
-# Copy start_rstudio_server.sh into the image
 COPY start_rstudio_server.sh /usr/local/bin/start_rstudio_server.sh
-RUN chmod +x /usr/local/bin/start_rstudio_server.sh
 
-# Generate a basic Openbox menu file to avoid missing menu warnings
-RUN mkdir -p /var/lib/openbox && \
+RUN chmod +x /usr/local/bin/start_workspace.sh \
+    /usr/local/bin/start_jupyterlab.sh \
+    /usr/local/bin/update_rstudio.sh \
+    /usr/local/bin/start_rstudio_server.sh && \
+    mkdir -p /var/lib/openbox && \
     echo '<openbox_menu></openbox_menu>' > /var/lib/openbox/debian-menu.xml && \
-    echo "Openbox menu file created at /var/lib/openbox/debian-menu.xml"
+    mkdir -p /workspace
 
-# Set permissions for workspace directory
-RUN mkdir -p /workspace
-
-# Default to root user
+EXPOSE 8888
 USER root
-
-# Specifying Entry Point
 ENTRYPOINT ["/usr/local/bin/start_workspace.sh"]
 CMD []
+
